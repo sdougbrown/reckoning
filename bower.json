@@ -1,0 +1,7 @@
+{
+  "name": "mithril-reckoning",
+  "version": "0.0.0",
+  "dependencies": {
+    "mithril": "git://github.com/lhorie/mithril.js.git"
+  }
+}
