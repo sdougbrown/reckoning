@@ -23,8 +23,8 @@
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // utils - borrowed concept from mithril core.
-  var hasOwn = {}.hasOwnProperty
-  var type = {}.toString
+  var hasOwn = {}.hasOwnProperty;
+  var type = {}.toString;
 
   function isFunction (object) {
     return typeof object === "function";
@@ -46,6 +46,31 @@
     return type.call(object) === "[object Array]";
   };
 
+  // shallow copy defaults + attrs
+  function assign (defaults, attrs) {
+    var obj = {};
+    for (var prop in defaults) obj[prop] = defaults[prop];
+    // allow 'true' to just use defaults
+    if (isObject(attrs)) {
+      for (var prop in attrs) obj[prop] = attrs[prop];
+    }
+    return obj;
+  };
+
+  function mapViewModel (ops) {
+    var map = {};
+
+    return function(key) {
+      if (!map[key]) {
+        map[key] = {};
+        for (var prop in ops) {
+          map[key][prop] = m.prop(ops[prop]());
+        }
+      }
+      return map[key]
+    };
+  };
+
   // use clever native locale strings, if supported
   function toLocaleStringSupportsLocales() {
     try {
@@ -62,12 +87,34 @@
   Reckoning = function (attrs) {
     attrs = attrs || {};
 
+    // set locale from passed attr (falls back internally)
+    this.locale(attrs.locale);
+
+    this.string = assign(this.defaults.string, attrs.string);
+    this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
+    this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
+
+    if (attrs.calendar) {
+      this.calendar = new Calendar(this, assign(this.defaults.calendar, attrs.calendar));
+    }
+    if (attrs.timeline) {
+      this.timeline = new Timeline(this, assign(this.defaults.timeline, attrs.timeline));
+    }
+
     return {
-      mapRange: this.Range.prototype.mapRange,
+      calendar: this.calendar,
+      timeline: this.timeline,
+      months: this.months,
+      days: this.days,
+
+      mapRange: this.mapRange,
       mapMonths: this.mapMonths,
       mapDays: this.mapDays,
+
+      locale: this.locale,
       format: this.format,
       parse: this.parse,
+
       getMonth: this.getMonth,
       getDay: this.getDay
     };
@@ -113,6 +160,20 @@
       }
     },
 
+    locale: function (locale) {
+      // set passed value
+      // can un-set and go to default (null value only)
+      if (!!locale || locale === null) {
+        this._locale = locale;
+      }
+      // fall back to default if unset
+      if (!this._locale) {
+        this._locale = this.defaults.locale;
+      }
+
+      return this._locale;
+    },
+
     parse: function (date) {
       // bail if invalid
       if (!date || !isString(date)) return null;
@@ -123,7 +184,7 @@
 
       // parse via digits only
       // assumes yyyy mm dd
-      var splitDate = date.split(/\D+/).map(function(part){
+      var splitDate = date.split(/\D+/).map(function(part) {
         return parseInt(part, 10)
       });
 
@@ -153,26 +214,24 @@
       date = this.parse(date);
       if (!date) return null;
 
+      var index = date.getMonth();
+      return {
+        index: index,
+        numeric: index + 1,
+        string: (this.months) ? this.months()[index] : MONTHS[index]
+      }
     },
 
     getDay: function (date) {
       date = this.parse(date);
       if (!date) return null;
 
-    },
-
-    mapViewModel: function (ops) {
-      var map = {};
-
-      return function(key) {
-        if (!map[key]) {
-          map[key] = {};
-          for (var prop in ops) {
-            map[key][prop] = m.prop(ops[prop]());
-          }
-        }
-        return map[key]
-      };
+      var index = date.getDay();
+      return {
+        index: index,
+        numeric: index + 1,
+        string: (this.days) ? this.days()[index] : DAYS[index]
+      }
     },
 
     mapMonths: function (ops) {
@@ -201,11 +260,14 @@
       };
     },
 
+    mapRange: function (range) {
+
+    },
 
     _getLocaleMap: function (type, ops) {
       ops = ops || {};
       var string = ops.string[type] || this.string[type] || this.defaults.string[type];
-      var locale = ops.locale || this.locale;
+      var locale = ops.locale || this.locale();
       var map = [];
 
       // arbitrary starting point
@@ -256,53 +318,53 @@
 
     },
 
+  };
 
-    // child constructors
-    Range: function (ops) {
+  // child constructors
+  var Range = function (parent, ops) {
+    this.parent = parent;
+  },
 
-    },
+  Range.prototype = {
+    constructor: Range
+  },
 
-    Range.prototype: {
-      mapRange: function (range) {
+  var Timeline = function (parent, ops) {
+    this.parent = parent;
+  },
 
-      }
-    },
+  Timeline.prototype = {
+    constructor: Timeline,
 
-    Timeline: function (ops) {
-
-    },
-
-    Timeline.prototype: {
-      unitMap: {
-        day: Date.prototype.getDate,
-        month: Date.prototype.getMonth,
-        year: Date.prototype.getFullYear
-      }
-    },
-
-    Calendar: function (ops) {
-
-    },
-
-    Calendar.prototype: {
-
-    },
-
-    Month: function (ops) {
-
-    },
-
-    Month.prototype: {
-
+    unitMap: {
+      day: Date.prototype.getDate,
+      month: Date.prototype.getMonth,
+      year: Date.prototype.getFullYear
     }
+  },
 
-    Day: function (ops) {
+  var Calendar = function (parent, ops) {
+    this.parent = parent;
+  },
 
-    },
+  Calendar.prototype = {
+    constructor: Calendar
+  },
 
-    Day.prototype: {
+  var Month = function (parent, ops) {
+    this.parent = parent;
+  },
 
-    }
+  Month.prototype = {
+    constructor: Month
+  };
+
+  var Day = function (parent, ops) {
+    this.parent = parent;
+  },
+
+  Day.prototype = {
+    constructor: Day
   };
 
   return Reckoning;
