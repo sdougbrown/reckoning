@@ -102,6 +102,10 @@
     // set locale from passed attr (falls back internally)
     this.locale(attrs.locale);
 
+    // set external parse/format if provided
+    this._parse = attrs.parse;
+    this._format = attrs.format;
+
     this.string = assign(this.defaults.string, attrs.string);
     this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
     this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
@@ -123,8 +127,8 @@
       mapMonths: this.mapMonths.bind(this),
       mapDays: this.mapDays.bind(this),
 
-      format: this.format,
-      parse: this.parse,
+      format: this.format.bind(this),
+      parse: this.parse.bind(this),
 
       getMonth: this.getMonth.bind(this),
       getDay: this.getDay.bind(this)
@@ -215,10 +219,19 @@
     },
 
     format: function (date, ops) {
+      ops = ops || {};
       date = this.parse(date);
       if (!date) return null;
       if (this._format) return this._format(date);
 
+      if (canUseLocales) {
+        var locale = ops.locale || this.locale();
+        var string = ops.string || this.string || this.defaults.string;
+        return date.toLocaleDateString(locale, string);
+      }
+
+      // manually build the formatted string
+      return '' + this.getDay(date) + ', ' + this.getMonth(date) + date.getDate() + ', ' + date.getFullYear();
     },
 
     getMonth: function (date) {
