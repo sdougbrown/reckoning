@@ -1,17 +1,21 @@
 (function (global, factory) {
 
-  var Reckoning = factory();
+  var Reckoning = factory(global);
+  var reckoning = new Reckoning();
 
   // bind to the global scope without polyfills
   if (typeof module === "object" && module != null && module.exports) {
     module.exports = Reckoning;
+    module.exports = reckoning;
   } else if (typeof define === "function" && define.amd) {
     define(function () { return Reckoning; });
+    define(function () { return reckoning; });
   } else {
     global.Reckoning = Reckoning;
+    global.reckoning = reckoning;
   }
 
-})(typeof window !== "undefined" ? window : {}, function () {
+})(typeof window !== "undefined" ? window : {}, function (global) {
   'use strict';
 
   // simple non-locale maps
@@ -71,6 +75,12 @@
     };
   };
 
+  function getLocale (navigator) {
+    navigator = navigator || global.navigator;
+
+    return navigator.languages || navigatior.userLanguage || navigator.language || 'en-US';
+  };
+
   // use clever native locale strings, if supported
   function toLocaleStringSupportsLocales() {
     try {
@@ -84,15 +94,17 @@
   var canUseLocales = toLocaleStringSupportsLocales();
 
   // Reckoning core
-  Reckoning = function (attrs) {
+  var Reckoning = function (attrs) {
+    if (!this) return;
+
     attrs = attrs || {};
 
     // set locale from passed attr (falls back internally)
     this.locale(attrs.locale);
 
     this.string = assign(this.defaults.string, attrs.string);
-    this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
     this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
+    this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
 
     if (attrs.calendar) {
       this.calendar = new Calendar(this, assign(this.defaults.calendar, attrs.calendar));
@@ -101,22 +113,21 @@
       this.timeline = new Timeline(this, assign(this.defaults.timeline, attrs.timeline));
     }
 
+    if (attrs.calendar || attrs.timeline) {
+      return this;
+    }
+
+    // non-constructor public functions
     return {
-      calendar: this.calendar,
-      timeline: this.timeline,
-      months: this.months,
-      days: this.days,
-
       mapRange: this.mapRange,
-      mapMonths: this.mapMonths,
-      mapDays: this.mapDays,
+      mapMonths: this.mapMonths.bind(this),
+      mapDays: this.mapDays.bind(this),
 
-      locale: this.locale,
       format: this.format,
       parse: this.parse,
 
-      getMonth: this.getMonth,
-      getDay: this.getDay
+      getMonth: this.getMonth.bind(this),
+      getDay: this.getDay.bind(this)
     };
   };
 
@@ -126,7 +137,7 @@
     constructor: Reckoning,
 
     defaults: {
-      locale: navigatior.userLanguage || navigator.language || 'en-US',
+      locale: getLocale(),
 
       range: {
         name: null,
@@ -237,27 +248,15 @@
     mapMonths: function (ops) {
       // cannot map via locale - send english
       if (!canUseLocales) return MONTHS;
-      var map = {};
 
-      return function (key) {
-        if (!map[key]) {
-          map[key] = this._getLocaleMap('month', ops);
-        }
-        return map[key];
-      };
+      return this._getLocaleMap('month', ops);
     },
 
     mapDays: function (ops) {
       // cannot map via locale - send english
       if (!canUseLocales) return DAYS;
-      var map = {};
 
-      return function (key) {
-        if (!map[key]) {
-          map[key] = this._getLocaleMap('weekday', ops);
-        }
-        return map[key];
-      };
+      return this._getLocaleMap('weekday', ops);
     },
 
     mapRange: function (range) {
@@ -265,7 +264,11 @@
     },
 
     _getLocaleMap: function (type, ops) {
+      if (ops && isString(ops)) {
+        ops = { locale: ops };
+      }
       ops = ops || {};
+      ops.string = ops.string || {};
       var string = ops.string[type] || this.string[type] || this.defaults.string[type];
       var locale = ops.locale || this.locale();
       var map = [];
@@ -273,7 +276,7 @@
       // arbitrary starting point
       // Feb 2015 has days that map nicely to weekdays
       // (1st is a Sunday)
-      var date = new Date(2015, 01);
+      var date = new Date(2015, 1);
 
       // acceptable type maps hardcoded here
       var typeMap = {
@@ -282,13 +285,13 @@
           index: DAYS
         },
         month: {
-          adjust: date.setMonth
+          adjust: date.setMonth,
           index: MONTHS
         }
       };
 
       // bail if type is not pre-defined
-      if (typeMap[type]) return null;
+      if (!typeMap[type]) return null;
 
       // map object for string display
       var stringOps = {};
@@ -323,15 +326,15 @@
   // child constructors
   var Range = function (parent, ops) {
     this.parent = parent;
-  },
+  };
 
   Range.prototype = {
     constructor: Range
-  },
+  };
 
   var Timeline = function (parent, ops) {
     this.parent = parent;
-  },
+  };
 
   Timeline.prototype = {
     constructor: Timeline,
@@ -341,19 +344,19 @@
       month: Date.prototype.getMonth,
       year: Date.prototype.getFullYear
     }
-  },
+  };
 
   var Calendar = function (parent, ops) {
     this.parent = parent;
-  },
+  };
 
   Calendar.prototype = {
     constructor: Calendar
-  },
+  };
 
   var Month = function (parent, ops) {
     this.parent = parent;
-  },
+  };
 
   Month.prototype = {
     constructor: Month
@@ -361,7 +364,7 @@
 
   var Day = function (parent, ops) {
     this.parent = parent;
-  },
+  };
 
   Day.prototype = {
     constructor: Day
