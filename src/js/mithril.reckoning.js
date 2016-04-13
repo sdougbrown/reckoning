@@ -21,10 +21,12 @@
   // simple non-locale maps
   //
   // Reckoning will fall back to this
-  // if locale support fails in the browser
+  // if locale support fails in the browser.
   // also, used create locale maps
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  var DAY_IN_MS = 24 * 60 * 60 * 1000;
 
   // utils - borrowed concept from mithril core.
   var hasOwn = {}.hasOwnProperty;
@@ -36,6 +38,10 @@
 
   function isObject (object) {
     return type.call(object) === "[object Object]";
+  };
+
+  function isNumber (object) {
+    return type.call(object) === "[object Number]";
   };
 
   function isString (object) {
@@ -81,6 +87,7 @@
     return navigator.languages || navigatior.userLanguage || navigator.language || 'en-US';
   };
 
+
   // use clever native locale strings, if supported
   function toLocaleStringSupportsLocales() {
     try {
@@ -123,7 +130,10 @@
 
     // non-constructor public functions
     return {
-      mapRange: this.mapRange,
+      months: this.months,
+      days: this.days,
+
+      mapRange: this.mapRange.bind(this),
       mapMonths: this.mapMonths.bind(this),
       mapDays: this.mapDays.bind(this),
 
@@ -150,8 +160,8 @@
         legend: null,
         toDate: null,
         fromDate: null,
-        everyDay: null,
         everyDate: null,
+        everyWeekday: null,
         everyMonth: null
       },
 
@@ -191,7 +201,7 @@
 
     parse: function (date) {
       // bail if invalid
-      if (!date || !isString(date)) return null;
+      if (!date || (!isString(date) && !isDate(date))) return null;
       // pass through date objects
       if (isDate(date)) return date;
       // use custom parser, if it exists
@@ -234,6 +244,18 @@
       return '' + this.getDay(date) + ', ' + this.getMonth(date) + date.getDate() + ', ' + date.getFullYear();
     },
 
+    // XXX: Extend to check months/weeks/years/etc?
+    between: function (date1, date2, ops) {
+      console.log(date1, date2);
+      date1 = this.parse(date1);
+      date2 = this.parse(date2);
+      if (!date1 || !date2) return null;
+
+      var diff = date1.getTime() - date2.getTime();
+      return Math.round(Math.abs(diff) / DAY_IN_MS);
+    },
+
+
     getMonth: function (date) {
       date = this.parse(date);
       if (!date) return null;
@@ -258,6 +280,8 @@
       }
     },
 
+
+
     mapMonths: function (ops) {
       // cannot map via locale - send english
       if (!canUseLocales) return MONTHS;
@@ -272,9 +296,52 @@
       return this._getLocaleMap('weekday', ops);
     },
 
-    mapRange: function (range) {
+    // mapped ranges are finite,
+    // this function will explicitly return
+    // separate objects for exact-date matches,
+    // and partial-date matches (e.g. every*)
+    mapRange: function (range, ops) {
+      range = range || {};
+      ops = ops || {};
 
+      var rangeMap = {
+        byDate: this._getMapBetween(range.fromDate, range.toDate) || {},
+        byMonth: function () {
+          if (!range.everyMonth || isObject(range.everyMonth)) return null;
+
+          var monthObj = {};
+
+          if (!isArray(range.everyMonth)) {
+            monthObj[range.everyMonth] = true;
+          }
+
+          if (isArray(range.everyMonth)) {
+            for (var i in range.everyMonth) {
+              monthObj[range.everyMonth[i]] = true;
+            }
+          }
+
+          return monthObj;
+        }
+      };
+
+
+      var inRange = function (rangeMap, date) {
+        date = this.parse(date);
+        return rangeMap.byDate[this._getDateKey(date)];
+      };
+
+      return {
+        name: ops.name || range.name,
+        legend: ops.legend || range.legend,
+        inRange: inRange.bind(this, rangeMap),
+        byDate: rangeMap.byDate,
+        byMonth: rangeMap.byMonth,
+        byWeekday: rangeMap.byWeekday,
+        byDay: rangeMap.byDay
+      };
     },
+
 
     _getLocaleMap: function (type, ops) {
       if (ops && isString(ops)) {
@@ -331,9 +398,48 @@
       date = this.parse(date);
       if (!date) return null;
 
-
+      return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
     },
 
+    _getMonthKey: function (month) {
+      // this is tricky and we need to
+      // make some assumptions (for now)
+      // basically numbers can be directly mapped,
+      // strings should run through parseInt,
+      // NaN should be mapped against 'months',
+      // and all month keys should be 'human' style
+      // (i.e. getDate() + 1)
+      // but we can assume that this will be provided
+      if (!month) return null;
+
+      var key = parseInt(month);
+
+      if (key !== NaN) {
+        return key;
+      }
+
+      return null;
+    },
+
+    _getMapBetween: function (from, to) {
+      from = this.parse(from);
+      to = this.parse(to);
+      if (!from || !to) return null;
+      // flip the order if the dates were transposed
+      var date = (to > from) ? new Date(from) : new Date(to);
+      var difference = this.between(from, to);
+      var days = 0;
+      var map = {};
+
+      for (;days <= difference; days++) {
+        map[this._getDateKey(date)] = {
+          date: new Date(date)
+        }
+        date.setTime(date.getTime() + DAY_IN_MS);
+      }
+
+      return map;
+    }
   };
 
   // child constructors

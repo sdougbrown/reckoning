@@ -11,7 +11,7 @@
     "build:demojs": "copyfiles -u 2 ./src/js/*.js ./demo/js",
     "build:html": "copyfiles -u 1 ./src/index.html ./demo",
     "build:favicon": "copyfiles -u 1 ./src/favicon.ico ./demo",
-    "build:bower": "copyfiles -u 2 ./bower_components/mithril/mithril.min.js ./demo/vendor/js",
+    "build:bower": "copyfiles -u 2 ./bower_components/mithril/mithril.min.js ./demo/vendor/js && copyfiles -u 2 ./bower_components/mithril/mithril.min.js.map ./demo/vendor/js",
     "build": "npm run build:css && npm run build:js && npm run build:html && npm build:favicon && npm build:bower",
     "watch:css": "watch 'npm run build:css' ./src/scss/",
     "watch:js": "watch 'npm run build:demojs' ./src/js/",
