@@ -200,10 +200,11 @@
     },
 
     parse: function (date) {
-      // bail if invalid
-      if (!date || (!isString(date) && !isDate(date))) return null;
+      if (!date) return null;
       // pass through date objects
       if (isDate(date)) return date;
+      // bail if invalid
+      if (!isString(date)) return null;
       // use custom parser, if it exists
       if (this._parse) return this._parse(date);
 
@@ -246,7 +247,6 @@
 
     // XXX: Extend to check months/weeks/years/etc?
     between: function (date1, date2, ops) {
-      console.log(date1, date2);
       date1 = this.parse(date1);
       date2 = this.parse(date2);
       if (!date1 || !date2) return null;
@@ -296,51 +296,10 @@
       return this._getLocaleMap('weekday', ops);
     },
 
-    // mapped ranges are finite,
-    // this function will explicitly return
-    // separate objects for exact-date matches,
-    // and partial-date matches (e.g. every*)
     mapRange: function (range, ops) {
-      range = range || {};
-      ops = ops || {};
-
-      var rangeMap = {
-        byDate: this._getMapBetween(range.fromDate, range.toDate) || {},
-        byMonth: function () {
-          if (!range.everyMonth || isObject(range.everyMonth)) return null;
-
-          var monthObj = {};
-
-          if (!isArray(range.everyMonth)) {
-            monthObj[range.everyMonth] = true;
-          }
-
-          if (isArray(range.everyMonth)) {
-            for (var i in range.everyMonth) {
-              monthObj[range.everyMonth[i]] = true;
-            }
-          }
-
-          return monthObj;
-        }
-      };
-
-
-      var inRange = function (rangeMap, date) {
-        date = this.parse(date);
-        return rangeMap.byDate[this._getDateKey(date)];
-      };
-
-      return {
-        name: ops.name || range.name,
-        legend: ops.legend || range.legend,
-        inRange: inRange.bind(this, rangeMap),
-        byDate: rangeMap.byDate,
-        byMonth: rangeMap.byMonth,
-        byWeekday: rangeMap.byWeekday,
-        byDay: rangeMap.byDay
-      };
+      return new DateRange(this, range, ops);
     },
+
 
 
     _getLocaleMap: function (type, ops) {
@@ -399,9 +358,106 @@
       if (!date) return null;
 
       return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    }
+  };
+
+
+  // child constructors
+  var DateRange = function (parent, range, ops) {
+    this.parent = parent;
+
+    range = range || {};
+    ops = ops || {};
+
+    // parse and assign to this._*
+    this.fromDate(range.fromDate);
+    this.toDate(range.toDate);
+
+    // create fintie maps
+    this.byDate = this._getMapBetween(range.fromDate, range.toDate) || {};
+    this.byMonth = this._getMapByRepeat(range.everyMonth, 'month');
+    this.byWeekday = this._getMapByRepeat(range.everyWeekday, 'weekday');
+    this.byDay = this._getMapByRepeat(range.everyDate);
+
+    // add to dates map
+    if (range.dates) {
+      var dates = (isArray(range.dates)) ? range.dates : [range.dates];
+
+      for (var i in dates) this.addDate(dates[i]);
+    }
+
+  };
+
+  DateRange.prototype = {
+    constructor: DateRange,
+
+    setDate: function (date, value) {
+      date = this.parent.parse(date);
+      if (!date) return;
+
+      this.byDate[this.parent._getDateKey(date)] = value;
     },
 
-    _getMonthKey: function (month) {
+    addDate: function (date) {
+      this.setDate(date, true);
+    },
+
+    removeDate: function (date) {
+      this.setDate(date, false);
+    },
+
+    clearDates: function () {
+      for (var prop in this.byDate) {
+        this.byDate[prop] = false;
+      }
+    },
+
+    // if city, population: you
+    inRange: function (date) {
+      date = this.parent.parse(date);
+      if (!date) return false;
+
+      var isMatch = !!this.byDate[this.parent._getDateKey(date)];
+      if (isMatch) return isMatch;
+
+      var isInfinite =  (this._toDate && !this._fromDate) || (!this._toDate && this._fromDate);
+      if (isInfinite) {
+        if (this._toDate) isMatch = date.getTime() <= this._toDate.getTime();
+        if (this._fromDate) isMatch = date.getTime() >= this._fromDate.getTime();
+        // do not check any further if not within the from/to range
+        if (!isMatch) return isMatch;
+      }
+
+      if (this.byMonth) {
+        isMatch = !!this.byMonth[date.getMonth() + 1];
+        if (isMatch && this.byWeekday) isMatch = !!this.byWeekday[date.getDay()];
+        if (isMatch && this.byDay) isMatch = !!this.byDay[date.getDate()];
+      }
+      if (this.byWeekday && !this.byMonth) {
+        isMatch = !!this.byWeekday[date.getDay()];
+        if (isMatch && this.byDay) isMatch = !!this.byDay[date.getDate()];
+      }
+      if (this.byDay && !this.byMonth && !this.byWeekday) {
+        isMatch = this.byDay[date.getDate()];
+      }
+
+      return isMatch;
+    },
+
+
+    fromDate: function (date) {
+      if (date) this._fromDate = this.parent.parse(date);
+
+      return this._fromDate;
+    },
+
+    toDate: function (date) {
+      if (date) this._toDate = this.parent.parse(date);
+
+      return this._toDate;
+    },
+
+    _getNumericalKey: function (value, type) {
       // this is tricky and we need to
       // make some assumptions (for now)
       // basically numbers can be directly mapped,
@@ -409,46 +465,64 @@
       // NaN should be mapped against 'months',
       // and all month keys should be 'human' style
       // (i.e. getDate() + 1)
-      // but we can assume that this will be provided
-      if (!month) return null;
+      // others can be exact
+      // for now, assume that this will be provided correctly
+      if (!value) return null;
 
-      var key = parseInt(month);
+      var key = parseInt(value);
 
       if (key !== NaN) {
         return key;
+      }
+
+      if (type === 'month') {
+        var index = this.parent.months().indexOf(value);
+        return (index > -1) ? index + 1 : null;
+      }
+
+      if (type === 'weekday') {
+        var index = this.parent.days().indexOf(value);
+        return (index > -1) ? index : null;
       }
 
       return null;
     },
 
     _getMapBetween: function (from, to) {
-      from = this.parse(from);
-      to = this.parse(to);
+      from = this.parent.parse(from);
+      to = this.parent.parse(to);
       if (!from || !to) return null;
       // flip the order if the dates were transposed
       var date = (to > from) ? new Date(from) : new Date(to);
-      var difference = this.between(from, to);
+      var difference = this.parent.between(from, to);
       var days = 0;
       var map = {};
 
       for (;days <= difference; days++) {
-        map[this._getDateKey(date)] = {
-          date: new Date(date)
-        }
+        map[this.parent._getDateKey(date)] = true;
         date.setTime(date.getTime() + DAY_IN_MS);
       }
 
       return map;
+    },
+
+    _getMapByRepeat: function (everyValue, type) {
+      if (!everyValue || isObject(everyValue)) return null;
+
+      var map = {};
+      var key;
+
+      if (!isArray(everyValue)) {
+        everyValue = [everyValue];
+      }
+
+      for (var i in everyValue) {
+        key = this._getNumericalKey(everyValue[i], type);
+        map[key] = true;
+      }
+
+      return map;
     }
-  };
-
-  // child constructors
-  var Range = function (parent, ops) {
-    this.parent = parent;
-  };
-
-  Range.prototype = {
-    constructor: Range
   };
 
   var Timeline = function (parent, ops) {
