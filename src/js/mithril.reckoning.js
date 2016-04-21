@@ -123,26 +123,6 @@
     if (attrs.timeline) {
       this.timeline = new Timeline(this, assign(this.defaults.timeline, attrs.timeline));
     }
-
-    if (attrs.calendar || attrs.timeline) {
-      return this;
-    }
-
-    // non-constructor public functions
-    return {
-      months: this.months,
-      days: this.days,
-
-      mapRange: this.mapRange.bind(this),
-      mapMonths: this.mapMonths.bind(this),
-      mapDays: this.mapDays.bind(this),
-
-      format: this.format.bind(this),
-      parse: this.parse.bind(this),
-
-      getMonth: this.getMonth.bind(this),
-      getDay: this.getDay.bind(this)
-    };
   };
 
   Reckoning.prototype = {
@@ -172,9 +152,9 @@
 
       calendar: {
         today: null,
-        months: 1,
+        numberOfMonths: 1,
         startWeekOnDay: 0,
-        startMonth: 0
+        month: 0
       },
 
       string: {
@@ -374,7 +354,7 @@
     this.toDate(range.toDate);
 
     // create fintie maps
-    this.byDate = this._getMapBetween(range.fromDate, range.toDate) || {};
+    this.byDate = (ops.between) ? this._getMapBetween(range.fromDate, range.toDate) : {};
     this.byMonth = this._getMapByRepeat(range.everyMonth, 'month');
     this.byWeekday = this._getMapByRepeat(range.everyWeekday, 'weekday');
     this.byDay = this._getMapByRepeat(range.everyDate);
@@ -420,10 +400,13 @@
       var isMatch = !!this.byDate[this.parent._getDateKey(date)];
       if (isMatch) return isMatch;
 
-      var isInfinite =  (this._toDate && !this._fromDate) || (!this._toDate && this._fromDate);
-      if (isInfinite) {
-        if (this._toDate) isMatch = date.getTime() <= this._toDate.getTime();
-        if (this._fromDate) isMatch = date.getTime() >= this._fromDate.getTime();
+      if (this._toDate || this._fromDate) {
+        var isMatchTo, isMatchFrom;
+        if (this._toDate) isMatchTo = date.getTime() <= this._toDate.getTime();
+        if (this._fromDate) isMatchFrom = date.getTime() >= this._fromDate.getTime();
+
+        isMatch = (this._toDate && this._fromDate) ? isMatchTo && isMatchFrom : isMatchTo || isMatchFrom;
+
         // do not check any further if not within the from/to range
         if (!isMatch) return isMatch;
       }
@@ -491,7 +474,7 @@
     _getMapBetween: function (from, to) {
       from = this.parent.parse(from);
       to = this.parent.parse(to);
-      if (!from || !to) return null;
+      if (!from || !to) return {};
       // flip the order if the dates were transposed
       var date = (to > from) ? new Date(from) : new Date(to);
       var difference = this.parent.between(from, to);
@@ -541,6 +524,11 @@
 
   var Calendar = function (parent, ops) {
     this.parent = parent;
+
+    this.today = m.prop(ops.today);
+    this.numberOfMonths = m.prop(ops.numberOfMonths);
+    this.startWeekOnDay = m.prop(ops.startWeekOnDay);
+    this.month = m.prop(ops.month);
   };
 
   Calendar.prototype = {
