@@ -81,6 +81,10 @@
     };
   };
 
+  function subMod(mod, attrs) {
+    return mod.view.bind(this, new mod.controller(attrs));
+  };
+
   function getLocale (navigator) {
     navigator = navigator || global.navigator;
 
@@ -113,6 +117,7 @@
     this._parse = attrs.parse;
     this._format = attrs.format;
 
+    this.ranges = this._mapRanges(attrs.ranges);
     this.string = assign(this.defaults.string, attrs.string);
     this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
     this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
@@ -140,6 +145,7 @@
         legend: null,
         toDate: null,
         fromDate: null,
+        fixedBetween: null,
         everyDate: null,
         everyWeekday: null,
         everyMonth: null
@@ -152,9 +158,13 @@
 
       calendar: {
         today: null,
+        dayView: null,
         numberOfMonths: 1,
         startWeekOnDay: 0,
-        month: 0
+        startDate: null,
+        year: null,
+        month: 0,
+        onDayClick: null
       },
 
       string: {
@@ -281,6 +291,16 @@
     },
 
 
+    _mapRanges: function (ranges) {
+      if (!ranges) return {};
+      var map = {};
+      for (var prop in ranges) {
+        if (!isObject(ranges[prop])) continue;
+        var key = ranges[prop].name || prop;
+        map[key] = this.mapRange(ranges[prop]);
+      }
+      return map;
+    },
 
     _getLocaleMap: function (type, ops) {
       if (ops && isString(ops)) {
@@ -295,12 +315,13 @@
       // arbitrary starting point
       // Feb 2015 has days that map nicely to weekdays
       // (1st is a Sunday)
-      var date = new Date(2015, 1);
+      var date = new Date(2015, 1, 1);
 
       // acceptable type maps hardcoded here
       var typeMap = {
         weekday: {
           adjust: date.setDate,
+          indexOffset: 1,
           index: DAYS
         },
         month: {
@@ -319,8 +340,11 @@
       // re-map back to date object for clarity
       date.adjust = typeMap[type].adjust;
 
+      // allow for date offset (0-index does crazy things)
+      var offset = typeMap[type].indexOffset || 0;
+
       var getString = function (value) {
-        date.adjust(value);
+        date.adjust(parseInt(value) + offset);
 
         return date.toLocaleDateString(locale, stringOps)
       };
@@ -354,7 +378,7 @@
     this.toDate(range.toDate);
 
     // create fintie maps
-    this.byDate = (ops.between) ? this._getMapBetween(range.fromDate, range.toDate) : {};
+    this.byDate = (range.fixedBetween) ? this._getMapBetween(range.fromDate, range.toDate) : {};
     this.byMonth = this._getMapByRepeat(range.everyMonth, 'month');
     this.byWeekday = this._getMapByRepeat(range.everyWeekday, 'weekday');
     this.byDay = this._getMapByRepeat(range.everyDate);
@@ -525,30 +549,148 @@
   var Calendar = function (parent, ops) {
     this.parent = parent;
 
-    this.today = m.prop(ops.today);
+    this._onDayClick = ops.onDayClick;
+
+    var startDate = this.parent.parse(ops.startDate);
+
+    this.calendarMonths = [];
+    this.today = m.prop(this.parent.parse(ops.today) || new Date());
     this.numberOfMonths = m.prop(ops.numberOfMonths);
     this.startWeekOnDay = m.prop(ops.startWeekOnDay);
-    this.month = m.prop(ops.month);
+    this.month = m.prop((!!startDate) ? startDate.getMonth() : ops.month);
+    this.year = m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear());
+    this.weekdays = m.prop(this.getWeekdayOrder());
+
+    this.updateMonths();
+
+    this.dayView = ops.dayView || this._dayView;
+    this.view = this._view.bind(this);
   };
 
   Calendar.prototype = {
-    constructor: Calendar
+    constructor: Calendar,
+
+    updateMonths: function () {
+      // this should check the month value (>0, <12)
+      // and set the month/year index accordingly
+      for (var i = 0; i < this.numberOfMonths(); i++) {
+        this.calendarMonths[i] = subMod(Month, {
+          calendar: this,
+          ranges: this.parent.ranges,
+          months: this.parent.months,
+          month: this.month() + i,
+          year: this.year()
+        });
+      }
+    },
+
+    getWeekdayOrder: function () {
+      return [].concat(
+        this.parent.days().slice(this.startWeekOnDay()),
+        this.parent.days().slice(0, this.startWeekOnDay())
+      );
+    },
+
+    onDayClick: function (date) {
+      if (this._onDayClick) this._onDayClick(date);
+    },
+
+    _view: function () {
+      return m('.rk-cal', [
+        this.calendarMonths.map(function(monthView) {
+          return monthView();
+        })
+      ]);
+    },
+
+    _dayView: function (date) {
+      return '';
+    }
   };
 
-  var Month = function (parent, ops) {
-    this.parent = parent;
+  var Month = {
+    controller: function (attrs) {
+      this.calendar = attrs.calendar;
+      this.ranges = attrs.ranges;
+      this.months = attrs.months;
+      this.month = attrs.month;
+      this.year = attrs.year;
+
+      // start at day 1 :)
+      var startDate = new Date(this.year, this.month, 1);
+      // generate calendar from the first day of the week
+      // to create an even grid - so count backwards until we hit it
+      startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.startWeekOnDay()));
+      // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
+      this.weeks = [[]];
+      for (var i = 0, week = 0, day = 0; i < 35; i++) {
+        this.weeks[week][day] = subMod(Day, {
+          calendar: this.calendar,
+          ranges: this.ranges,
+          date: new Date(startDate)
+        });
+
+        startDate.setDate(startDate.getDate() + 1);
+        day++;
+
+        // reset and go to the next week
+        if (day > 6) {
+          day = 0;
+          week++;
+          this.weeks[week] = [];
+        }
+      }
+    },
+    view: function (ctrl) {
+      return m('table.rk-cal__month', [
+        m('thead.rk-cal__head', [
+          m('tr.rk-cal__head__row--month', [
+            m('th.rk-cal__head__month', { colspan: 7 }, ctrl.months()[ctrl.month])
+          ]),
+          m('tr.rk-cal__head__row--weekday', [
+            ctrl.calendar.weekdays().map(function(day) {
+              return m('th.rk-cal__weekday', [
+                m('span', day)
+              ]);
+            })
+          ]),
+        ]),
+        ctrl.weeks.map(function(week) {
+          return m('tr.rk-cal__week', [
+            week.map(function(dayView) {
+              return dayView();
+            })
+          ]);
+        })
+      ]);
+    }
   };
 
-  Month.prototype = {
-    constructor: Month
-  };
+  var Day = {
+    controller: function (attrs) {
+      this.calendar = attrs.calendar;
+      this.ranges = attrs.ranges;
+      this.date = attrs.date;
 
-  var Day = function (parent, ops) {
-    this.parent = parent;
-  };
-
-  Day.prototype = {
-    constructor: Day
+      this.rangeClassNames = function () {
+        var className = '';
+        for (var prop in this.ranges) {
+          if (this.ranges[prop].inRange(this.date)) {
+            className += ' is-range-' + prop;
+          }
+        }
+        return className;
+      };
+    },
+    view: function (ctrl) {
+      return m('td.rk-cal__day', {
+        className: ctrl.rangeClassNames(),
+        onclick: function() { ctrl.calendar.onDayClick(ctrl.date) }
+      }, [
+        m('span.rk-cal__day__num', ctrl.date.getDate()),
+        ctrl.calendar.dayView(ctrl.date)
+      ]);
+    }
   };
 
   return Reckoning;
