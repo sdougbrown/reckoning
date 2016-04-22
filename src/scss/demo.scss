@@ -1,0 +1,37 @@
+// quick-n-dirty demo styles
+.calendar-demo-wrap {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f2f2f2;
+  color: #444;
+
+  .rk-cal {
+    margin: 0 auto 40px;
+  }
+
+  table {
+    width: 100%;
+    padding: 10px;
+    background: #fff;
+    text-align: center;
+  }
+}
+
+
+// demo ranges
+.is-range-today {
+  background: #f2f2f2;
+}
+
+.is-range-selected {
+  background: blue;
+  color: white;
+}
+
+.is-range-invalid,
+.is-range-invalidAfter,
+.is-range-invalidBefore {
+  background: #ccc;
+  color: #aaa;
+}

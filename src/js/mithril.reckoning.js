@@ -399,7 +399,8 @@
       date = this.parent.parse(date);
       if (!date) return;
 
-      this.byDate[this.parent._getDateKey(date)] = value;
+      // assigns value, or toggles if no value
+      this.byDate[this.parent._getDateKey(date)] = (value) ? value : !this.byDate[this.parent._getDateKey(date)];
     },
 
     addDate: function (date) {
@@ -592,7 +593,7 @@
     },
 
     onDayClick: function (date) {
-      if (this._onDayClick) this._onDayClick(date);
+      if (this._onDayClick) this._onDayClick(this.parent, date);
     },
 
     _view: function () {
@@ -622,7 +623,7 @@
       // to create an even grid - so count backwards until we hit it
       startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.startWeekOnDay()));
       // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
-      this.weeks = [[]];
+      this.weeks = [[],[],[],[],[]];
       for (var i = 0, week = 0, day = 0; i < 35; i++) {
         this.weeks[week][day] = subMod(Day, {
           calendar: this.calendar,
@@ -637,7 +638,6 @@
         if (day > 6) {
           day = 0;
           week++;
-          this.weeks[week] = [];
         }
       }
     },
@@ -653,15 +653,17 @@
                 m('span', day)
               ]);
             })
-          ]),
+          ])
         ]),
-        ctrl.weeks.map(function(week) {
-          return m('tr.rk-cal__week', [
-            week.map(function(dayView) {
-              return dayView();
-            })
-          ]);
-        })
+        m('tbody.rk-cal__body', [
+          ctrl.weeks.map(function(week) {
+            return m('tr.rk-cal__week', [
+              week.map(function(dayView) {
+                return dayView();
+              })
+            ]);
+          })
+        ])
       ]);
     }
   };
