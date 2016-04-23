@@ -52,6 +52,10 @@
     return type.call(object) === "[object Date]";
   };
 
+  function isDateRange (object) {
+    return type.call(object) === "[object DateRange]";
+  };
+
   var isArray = Array.isArray || function (object) {
     return type.call(object) === "[object Array]";
   };
@@ -85,10 +89,10 @@
     return mod.view.bind(this, new mod.controller(attrs));
   };
 
-  function getLocale (navigator) {
-    navigator = navigator || global.navigator;
+  function getLocale (nav) {
+    nav = nav || navigator || global.navigator;
 
-    return navigator.languages || navigatior.userLanguage || navigator.language || 'en-US';
+    return nav.languages || nav.userLanguage || nav.language || 'en-US';
   };
 
 
@@ -117,7 +121,7 @@
     this._parse = attrs.parse;
     this._format = attrs.format;
 
-    this.ranges = this._mapRanges(attrs.ranges);
+    this.ranges = (!!attrs.mappedRanges) ? attrs.mappedRanges : this._mapRanges(attrs.ranges);
     this.string = assign(this.defaults.string, attrs.string);
     this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
     this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
@@ -135,10 +139,15 @@
 
     constructor: Reckoning,
 
+    toString: function () {
+      return '[object Reckoning]';
+    },
+
     defaults: {
       locale: getLocale(),
 
       range: {
+        id: null,
         name: null,
         dates: null,
         events: null,
@@ -287,7 +296,7 @@
     },
 
     mapRange: function (range, ops) {
-      return new DateRange(this, range, ops);
+      return (isDateRange(range)) ? range : new DateRange(this, range, ops);
     },
 
 
@@ -296,8 +305,8 @@
       var map = {};
       for (var prop in ranges) {
         if (!isObject(ranges[prop])) continue;
-        var key = ranges[prop].name || prop;
-        map[key] = this.mapRange(ranges[prop]);
+        var key = ranges[prop].id || prop;
+        map[key] = this.mapRange(ranges[prop], { key: key });
       }
       return map;
     },
@@ -373,6 +382,7 @@
     range = range || {};
     ops = ops || {};
 
+    this.name =  this._getRangeName(range, ops);
     // parse and assign to this._*
     this.fromDate(range.fromDate);
     this.toDate(range.toDate);
@@ -394,6 +404,10 @@
 
   DateRange.prototype = {
     constructor: DateRange,
+
+    toString: function () {
+      return '[object DateRange]';
+    },
 
     setDate: function (date, value) {
       date = this.parent.parse(date);
@@ -530,6 +544,15 @@
       }
 
       return map;
+    },
+
+    _getRangeName: function (range, ops) {
+      var key = range.name || ops.key;
+      var str = '' + key;
+
+      return str.replace(/\W+/g, '-')
+                .replace(/([a-z\d])([A-Z])/g, '$1-$2')
+                .toLowerCase();
     }
   };
 
@@ -561,6 +584,8 @@
     this.month = m.prop((!!startDate) ? startDate.getMonth() : ops.month);
     this.year = m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear());
     this.weekdays = m.prop(this.getWeekdayOrder());
+
+    this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
     this.updateMonths();
 
@@ -596,6 +621,14 @@
       if (this._onDayClick) this._onDayClick(this.parent, date);
     },
 
+    _getSimpleDisplayDate: function (date) {
+      return date.getDate();
+    },
+
+    _getLocaleDisplayDate: function (date) {
+      return this.parent.format(date, { string: { day: 'numeric' } });
+    },
+
     _view: function () {
       return m('.rk-cal', [
         this.calendarMonths.map(function(monthView) {
@@ -616,30 +649,7 @@
       this.months = attrs.months;
       this.month = attrs.month;
       this.year = attrs.year;
-
-      // start at day 1 :)
-      var startDate = new Date(this.year, this.month, 1);
-      // generate calendar from the first day of the week
-      // to create an even grid - so count backwards until we hit it
-      startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.startWeekOnDay()));
-      // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
-      this.weeks = [[],[],[],[],[]];
-      for (var i = 0, week = 0, day = 0; i < 35; i++) {
-        this.weeks[week][day] = subMod(Day, {
-          calendar: this.calendar,
-          ranges: this.ranges,
-          date: new Date(startDate)
-        });
-
-        startDate.setDate(startDate.getDate() + 1);
-        day++;
-
-        // reset and go to the next week
-        if (day > 6) {
-          day = 0;
-          week++;
-        }
-      }
+      this.weeks = this.mapWeeks();
     },
     view: function (ctrl) {
       return m('table.rk-cal__month', [
@@ -668,30 +678,72 @@
     }
   };
 
+  Month.controller.prototype = {
+    mapWeeks: function () {
+      var weeks = [[],[],[],[],[]];
+      // start at day 1 :)
+      var startDate = new Date(this.year, this.month, 1);
+      // generate calendar from the first day of the week
+      // to create an even grid - so count backwards until we hit it
+      startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.startWeekOnDay()));
+      // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
+      for (var i = 0, week = 0, day = 0; i < 35; i++) {
+        weeks[week][day] = subMod(Day, {
+          calendar: this.calendar,
+          ranges: this.ranges,
+          month: this.month,
+          date: new Date(startDate)
+        });
+
+        startDate.setDate(startDate.getDate() + 1);
+        day++;
+
+        // reset and go to the next week
+        if (day > 6) {
+          day = 0;
+          week++;
+        }
+      }
+      return weeks;
+    }
+  };
+
   var Day = {
     controller: function (attrs) {
       this.calendar = attrs.calendar;
       this.ranges = attrs.ranges;
+      this.month = attrs.month;
       this.date = attrs.date;
 
-      this.rangeClassNames = function () {
-        var className = '';
-        for (var prop in this.ranges) {
-          if (this.ranges[prop].inRange(this.date)) {
-            className += ' is-range-' + prop;
-          }
-        }
-        return className;
+      this.vm = {
+        className: (this.month === this.date.getMonth()) ? 'is-month' : 'is-not-month'
       };
     },
+
     view: function (ctrl) {
       return m('td.rk-cal__day', {
-        className: ctrl.rangeClassNames(),
+        className: ctrl.classNames(),
         onclick: function() { ctrl.calendar.onDayClick(ctrl.date) }
       }, [
-        m('span.rk-cal__day__num', ctrl.date.getDate()),
+        m('span.rk-cal__day__num', ctrl.calendar.getDisplayDate(ctrl.date)),
         ctrl.calendar.dayView(ctrl.date)
       ]);
+    }
+  };
+
+  Day.controller.prototype = {
+    classNames: function () {
+      return this.vm.className + this.rangeClassNames();
+    },
+
+    rangeClassNames: function () {
+      var className = '';
+      for (var prop in this.ranges) {
+        if (this.ranges[prop].inRange(this.date)) {
+          className += ' is-range-' + this.ranges[prop].name;
+        }
+      }
+      return className;
     }
   };
 

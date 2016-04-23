@@ -18,6 +18,9 @@
   }
 }
 
+.is-not-month {
+  opacity: 0.3;
+}
 
 // demo ranges
 .is-range-today {
@@ -29,9 +32,7 @@
   color: white;
 }
 
-.is-range-invalid,
-.is-range-invalidAfter,
-.is-range-invalidBefore {
+.is-range-invalid {
   background: #ccc;
   color: #aaa;
 }
