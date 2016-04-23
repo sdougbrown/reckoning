@@ -1,7 +1,7 @@
 (function (global, factory) {
 
   var Reckoning = factory(global);
-  var reckoning = new Reckoning();
+  var reckoning = new Reckoning({ string: { weekday: 'long' } });
 
   // bind to the global scope without polyfills
   if (typeof module === "object" && module != null && module.exports) {
@@ -177,9 +177,9 @@
       },
 
       string: {
-        weekday: 'long',
+        weekday: 'short', // narrow/short/long
+        month: 'long', // narrow/short/long
         year: 'numeric',
-        month: 'long',
         day: 'numeric'
       }
     },
@@ -234,14 +234,38 @@
       if (!date) return null;
       if (this._format) return this._format(date);
 
+      var string = ops.string || this.string || this.defaults.string;
+
+      // use the built-in browser behaviour if we can
       if (canUseLocales) {
         var locale = ops.locale || this.locale();
-        var string = ops.string || this.string || this.defaults.string;
         return date.toLocaleDateString(locale, string);
       }
 
-      // manually build the formatted string
-      return '' + this.getDay(date) + ', ' + this.getMonth(date) + date.getDate() + ', ' + date.getFullYear();
+      // no parser, no browser support for localized strings...
+      // let's go ahead and build this thing ourselves
+      // note that this is NOT comprehensive.
+      // intentionally skipping weird combinations like month & weekday
+      // a custom formatter is better-suited to weird stuff like that
+      if (!!string.day && !!string.month) {
+        // add the day of the week if set
+        var dateString = (!!string.weekday) ? this.getDay(date).string + ', ' : '';
+
+        if (!!string.year) {
+          // use the basic behaviour if available
+          // otherwise, manually build the formatted string
+          dateString += (!!date.toLocaleDateString) ? date.toLocaleDateString() : this.getMonth(date).string + ' ' + date.getDate() + ', ' + date.getFullYear();
+          return dateString;
+        }
+
+        return dateString + this.getMonth(date).string + ' ' + date.getDate();
+      }
+      if (!!string.month) {
+        var str = this.getMonth(date).string;
+        return (!!string.year) ? str + ', ' + date.getFullYear() : str;
+      }
+      // otherwise just the weekday + date?
+      return this.getDay(date).string + ' ' + date.getDate();
     },
 
     // XXX: Extend to check months/weeks/years/etc?
@@ -282,17 +306,19 @@
 
 
     mapMonths: function (ops) {
+      var type = 'month';
       // cannot map via locale - send english
-      if (!canUseLocales) return MONTHS;
+      if (!canUseLocales) return this._getTrimmedStringMap(MONTHS, type, ops);
 
-      return this._getLocaleMap('month', ops);
+      return this._getLocaleMap(type, ops);
     },
 
     mapDays: function (ops) {
+      var type = 'weekday';
       // cannot map via locale - send english
-      if (!canUseLocales) return DAYS;
+      if (!canUseLocales) return this._getTrimmedStringMap(DAYS, type, ops);
 
-      return this._getLocaleMap('weekday', ops);
+      return this._getLocaleMap(type, ops);
     },
 
     mapRange: function (range, ops) {
@@ -309,6 +335,34 @@
         map[key] = this.mapRange(ranges[prop], { key: key });
       }
       return map;
+    },
+
+    // duplicates the native browser method for triming
+    // months/days/etc based on string values
+    _getTrimmedStringMap: function (array, type, ops) {
+      ops = ops || {};
+      ops.string = ops.string || {};
+      var stringFormat = ops.string[type] || this.string[type] || this.defaults.string[type];
+      var map = array.slice(0);
+      var stringFormatMap = {
+        // ignore '2-digit' and 'numeric',
+        // those are easier to get at more directly
+        // and this is only intended as a last-ditch
+        // fallback anyway so no need to go crazy
+        long: function (string) {
+          return string; // lol do nothing
+        },
+        short: function (string) {
+          return string.substr(0,3); // 3-character
+        },
+        narrow: function (string) {
+          return string.substr(0,1); // 1-character
+        }
+      };
+
+      return map.map(function(string) {
+        return (stringFormatMap[stringFormat]) ? stringFormatMap[stringFormat](string) : string;
+      });
     },
 
     _getLocaleMap: function (type, ops) {
