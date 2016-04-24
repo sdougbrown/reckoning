@@ -97,7 +97,7 @@
       ctrl.basicCal.calendar.view(),
       m('h4', 'Custom Locale Calendar'),
       ctrl.basicLocalizedCal.calendar.view(),
-      m('h4', 'Highlight "Today"'),
+      m('h4', 'Highlight "Today" (Simple Range)'),
       ctrl.todayCal.calendar.view(),
       m('h4', 'Selections'),
       ctrl.selectCal.calendar.view(),

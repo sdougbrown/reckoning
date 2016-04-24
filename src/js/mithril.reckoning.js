@@ -708,12 +708,12 @@
     view: function (ctrl) {
       return m('table.rk-cal__month', [
         m('thead.rk-cal__head', [
-          m('tr.rk-cal__head__row--month', [
+          m('tr.rk-cal__head__row', { className: 'rk-cal__head__row--month' }, [
             m('th.rk-cal__head__month', { colspan: 7 }, ctrl.months()[ctrl.month])
           ]),
-          m('tr.rk-cal__head__row--weekday', [
+          m('tr.rk-cal__head__row', { className: 'rk-cal__head__row--weekday' } [
             ctrl.calendar.weekdays().map(function(day) {
-              return m('th.rk-cal__weekday', [
+              return m('th.rk-cal__head__weekday', [
                 m('span', day)
               ]);
             })
@@ -721,7 +721,7 @@
         ]),
         m('tbody.rk-cal__body', [
           ctrl.weeks.map(function(week) {
-            return m('tr.rk-cal__week', [
+            return m('tr.rk-cal__body__row', [
               week.map(function(dayView) {
                 return dayView();
               })
