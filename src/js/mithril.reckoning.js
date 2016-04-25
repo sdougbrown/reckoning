@@ -627,24 +627,28 @@
   var Calendar = function (parent, ops) {
     this.parent = parent;
 
+    this._onFocus = ops.onFocus;
     this._onDayClick = ops.onDayClick;
+    this._onDayKeydown = ops.onDayKeydown;
 
     var startDate = this.parent.parse(ops.startDate);
 
     this.calendarMonths = [];
     this.today = m.prop(this.parent.parse(ops.today) || new Date());
-    this.numberOfMonths = m.prop(ops.numberOfMonths);
-    this.startWeekOnDay = m.prop(ops.startWeekOnDay);
-    this.month = m.prop((!!startDate) ? startDate.getMonth() : ops.month);
-    this.year = m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear());
-    this.weekdays = m.prop(this.getWeekdayOrder());
-
     this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
+    this.vm = {
+      numberOfMonths: m.prop(ops.numberOfMonths),
+      startWeekOnDay: m.prop(ops.startWeekOnDay),
+      year: m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear()),
+      month: m.prop((!!startDate) ? startDate.getMonth() : ops.month)
+    };
+
+    this.weekdays = m.prop(this.getWeekdayOrder());
     this.updateMonths();
 
     this.dayView = ops.dayView || this._dayView;
-    this.view = this._view.bind(this);
+    this.view = this._view.bind(this, this);
   };
 
   Calendar.prototype = {
@@ -653,26 +657,34 @@
     updateMonths: function () {
       // this should check the month value (>0, <12)
       // and set the month/year index accordingly
-      for (var i = 0; i < this.numberOfMonths(); i++) {
+      for (var i = 0; i < this.vm.numberOfMonths(); i++) {
         this.calendarMonths[i] = subMod(Month, {
           calendar: this,
           ranges: this.parent.ranges,
           months: this.parent.months,
-          month: this.month() + i,
-          year: this.year()
+          month: this.vm.month() + i,
+          year: this.vm.year()
         });
       }
     },
 
     getWeekdayOrder: function () {
       return [].concat(
-        this.parent.days().slice(this.startWeekOnDay()),
-        this.parent.days().slice(0, this.startWeekOnDay())
+        this.parent.days().slice(this.vm.startWeekOnDay()),
+        this.parent.days().slice(0, this.vm.startWeekOnDay())
       );
     },
 
-    onDayClick: function (date) {
-      if (this._onDayClick) this._onDayClick(this.parent, date);
+    onFocus: function () {
+      if (this._onFocus) this._onFocus(this);
+    },
+
+    onDayClick: function (e, date) {
+      if (this._onDayClick) this._onDayClick(e, this.parent, date);
+    },
+
+    onDayKeydown: function (e, date, indexes) {
+      if (this._onDayKeydown) this._onDayKeydown(e, this.parent, date, indexes);
     },
 
     _getSimpleDisplayDate: function (date) {
@@ -683,9 +695,12 @@
       return this.parent.format(date, { string: { day: 'numeric' } });
     },
 
-    _view: function () {
-      return m('.rk-cal', [
-        this.calendarMonths.map(function(monthView) {
+    _view: function (ctrl) {
+      return m('.rk-cal', {
+        onfocus: ctrl.onFocus.bind(ctrl),
+        tabindex: '0'
+      }, [
+        ctrl.calendarMonths.map(function(monthView) {
           return monthView();
         })
       ]);
@@ -703,27 +718,36 @@
       this.months = attrs.months;
       this.month = attrs.month;
       this.year = attrs.year;
-      this.weeks = this.mapWeeks();
+
+      this.days = [];
+      this.dates = {};
+      this.weeks = this.mapWeeks({ dates: this.dates, days: this.days });
     },
     view: function (ctrl) {
-      return m('table.rk-cal__month', [
-        m('thead.rk-cal__head', [
-          m('tr.rk-cal__head__row', { className: 'rk-cal__head__row--month' }, [
+      return m('table.rk-cal__month', { role: 'grid' }, [
+        m('thead.rk-cal__head', { role: 'rowgroup' }, [
+          m('tr.rk-cal__head__row', {
+            role: 'row',
+            className: 'rk-cal__head__row--month'
+          }, [
             m('th.rk-cal__head__month', { colspan: 7 }, ctrl.months()[ctrl.month])
           ]),
-          m('tr.rk-cal__head__row', { className: 'rk-cal__head__row--weekday' } [
+          m('tr.rk-cal__head__row', {
+            role: 'row',
+            className: 'rk-cal__head__row--weekday'
+          }, [
             ctrl.calendar.weekdays().map(function(day) {
               return m('th.rk-cal__head__weekday', [
-                m('span', day)
+                m('span', { role: 'columnheader' }, day)
               ]);
             })
           ])
         ]),
-        m('tbody.rk-cal__body', [
+        m('tbody.rk-cal__body', { role: 'rowgroup' }, [
           ctrl.weeks.map(function(week) {
-            return m('tr.rk-cal__body__row', [
-              week.map(function(dayView) {
-                return dayView();
+            return m('tr.rk-cal__body__row', { role: 'row' }, [
+              week.map(function(day) {
+                return day.view();
               })
             ]);
           })
@@ -733,21 +757,33 @@
   };
 
   Month.controller.prototype = {
-    mapWeeks: function () {
+    mapWeeks: function (ops) {
+      var dayMap = ops.days;
+      var dateMap = ops.dates;
       var weeks = [[],[],[],[],[]];
       // start at day 1 :)
       var startDate = new Date(this.year, this.month, 1);
       // generate calendar from the first day of the week
       // to create an even grid - so count backwards until we hit it
-      startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.startWeekOnDay()));
+      startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.vm.startWeekOnDay()));
       // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
       for (var i = 0, week = 0, day = 0; i < 35; i++) {
-        weeks[week][day] = subMod(Day, {
+        var dateKey = this.calendar.parent._getDateKey(startDate);
+        weeks[week][day] = new Day({
           calendar: this.calendar,
           ranges: this.ranges,
           month: this.month,
-          date: new Date(startDate)
+          date: new Date(startDate),
+          key: dateKey,
+          indexes: {
+            grid: i,
+            week: week,
+            weekday: day
+          }
         });
+
+        // map controllers to expose API
+        dateMap[dateKey] = dayMap[i] = weeks[week][day];
 
         startDate.setDate(startDate.getDate() + 1);
         day++;
@@ -762,35 +798,36 @@
     }
   };
 
-  var Day = {
-    controller: function (attrs) {
-      this.calendar = attrs.calendar;
-      this.ranges = attrs.ranges;
-      this.month = attrs.month;
-      this.date = attrs.date;
+  var Day = function (attrs) {
+    this.calendar = attrs.calendar;
+    this.ranges = attrs.ranges;
+    this.month = attrs.month;
+    this.date = attrs.date;
+    this.indexes = attrs.indexes;
+    this.key = attrs.key;
 
-      this.vm = {
-        className: (this.month === this.date.getMonth()) ? 'is-month' : 'is-not-month'
-      };
-    },
+    this.vm = {
+      focus: m.prop(false),
+      tabindex: m.prop(-1),
+      inFocusClassName: m.prop(''),
+      inMonthClassName: m.prop((this.month === this.date.getMonth()) ? ' is-month' : ' is-not-month')
+    };
 
-    view: function (ctrl) {
-      return m('td.rk-cal__day', {
-        className: ctrl.classNames(),
-        onclick: function() { ctrl.calendar.onDayClick(ctrl.date) }
-      }, [
-        m('span.rk-cal__day__num', ctrl.calendar.getDisplayDate(ctrl.date)),
-        ctrl.calendar.dayView(ctrl.date)
-      ]);
-    }
+    // this is kind of weird...
+    this.view = this._view.bind(this, this);
   };
 
-  Day.controller.prototype = {
-    classNames: function () {
-      return this.vm.className + this.rangeClassNames();
+  Day.prototype = {
+    config: function (element) {
+      // actual DOM stuff
+      if (element && this.vm.focus()) element.focus();
     },
 
-    rangeClassNames: function () {
+    classNames: function () {
+      return this.vm.inFocusClassName() + this.vm.inMonthClassName() + this.inRangeClassNames();
+    },
+
+    inRangeClassNames: function () {
       var className = '';
       for (var prop in this.ranges) {
         if (this.ranges[prop].inRange(this.date)) {
@@ -798,6 +835,41 @@
         }
       }
       return className;
+    },
+
+    onFocus: function () {
+      this.vm.inFocusClassName(' in-focus');
+    },
+
+    onBlur: function () {
+      this.vm.inFocusClassName('');
+    },
+
+    onClick: function (e) {
+      this.calendar.onDayClick(e, this.date);
+    },
+
+    onKeydown: function (e) {
+      this.calendar.onDayKeydown(e, this.date, this.indexes);
+    },
+
+    _view: function (ctrl) {
+      return m('td.rk-cal__day', {
+        key: ctrl.key,
+        role: 'gridcell',
+        'aria-rowindex': ctrl.indexes.week + 1,
+        'aria-colindex': ctrl.indexes.weekday + 1,
+        className: ctrl.classNames(),
+        tabindex: ctrl.vm.tabindex(),
+        onblur: ctrl.onBlur.bind(ctrl),
+        onfocus: ctrl.onFocus.bind(ctrl),
+        onclick: function(e) { ctrl.onClick(e) },
+        onkeydown: function(e) { ctrl.onKeydown(e) },
+        config: ctrl.config.bind(ctrl)
+      }, [
+        m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, this.calendar.getDisplayDate(ctrl.date)),
+        ctrl.calendar.dayView(ctrl.date)
+      ]);
     }
   };
 

@@ -7,11 +7,11 @@
     var fakeToday = new Date(2016, 04, 15);
 
     // actions
-    this.toggleDateSelection = function (rk, date) {
+    this.toggleDateSelection = function (e, rk, date) {
       rk.ranges.selected.setDate(date);
     };
 
-    this.toggleValidDateSelection = function (rk, date) {
+    this.toggleValidDateSelection = function (e, rk, date) {
       // this is kind of an extreme example
       if (rk.ranges.invalid.inRange(date)
          || rk.ranges.invalidBefore.inRange(date)
