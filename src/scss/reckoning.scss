@@ -21,9 +21,11 @@ $rk-cal-font-weight: normal !default;
 $rk-cal-font-size: 1em !default;
 $rk-cal-alignment: center !default;
 $rk-cal-line-height: inherit !default;
+$rk-cal-outline: none !default;
 
 $rk-cal-month-bg: $rk-cal-bg !default;
-$rk-cal-month-width: $rk-cal-width !default;
+$rk-cal-month-color: inherit !default;
+$rk-cal-month-width: 100% !default;
 $rk-cal-month-margin: 0 !default;
 $rk-cal-month-padding: $rk-cal-padding !default;
 $rk-cal-month-border-collapse: collapse !default;
@@ -36,7 +38,7 @@ $rk-cal-month-border: $rk-cal-month-border-width $rk-cal-month-border-style $rk-
 
 $rk-cal-head-bg: $rk-cal-bg !default;
 $rk-cal-head-color: $rk-cal-color !default;
-$rk-cal-head-padding: $rk-cal-padding !default;
+$rk-cal-head-padding: $rk-cal-month-padding !default;
 $rk-cal-head-border-width: 0 !default;
 $rk-cal-head-border-style: $rk-cal-border-style !default;
 $rk-cal-head-border-color: $rk-cal-head-bg !default;
@@ -67,7 +69,8 @@ $rk-cal-body-border-style: $rk-cal-border-style !default;
 $rk-cal-body-border-color: $rk-cal-head-bg !default;
 $rk-cal-body-border: $rk-cal-body-border-width $rk-cal-body-border-style $rk-cal-body-border-color !default;
 
-$rk-cal-day-padding: $rk-cal-padding !default;
+$rk-cal-day-padding: $rk-cal-month-padding !default;
+$rk-cal-day-border-radius: 0 !default;
 $rk-cal-day-border-width: 0 !default;
 $rk-cal-day-border-style: $rk-cal-border-style !default;
 $rk-cal-day-border-color: $rk-cal-body-bg !default;
@@ -76,8 +79,10 @@ $rk-cal-day-vertical-alignment: middle !default;
 $rk-cal-day-alignment: $rk-cal-alignment !default;
 $rk-cal-day-line-height: inherit !default;
 $rk-cal-day-height: auto !default;
+$rk-cal-day-outline: none !default;
+$rk-cal-day-cursor: default !default;
 // this is arbtrary and fixed because calendars are a 5x7 grid
-$rk-cal-day-width: (100 / 7)%;
+$rk-cal-day-width: (100% / 7);
 
 // Calendar
 //
@@ -91,6 +96,7 @@ $rk-cal-day-width: (100 / 7)%;
 
   margin: $rk-cal-margin;
   padding: $rk-cal-padding;
+  outline: $rk-cal-outline;
   border: $rk-cal-border;
   border-radius: $rk-cal-border-radius;
 
@@ -179,17 +185,22 @@ $rk-cal-day-width: (100 / 7)%;
 
   padding: $rk-cal-day-padding;
   border: $rk-cal-day-border;
+  outline: $rk-cal-day-outline;
 
   text-align: $rk-cal-day-alignment;
   line-height: $rk-cal-day-line-height;
   vertical-align: $rk-cal-day-vertical-alignment;
 
-  .rk-cal__body__row:last-child &:first-child {
-    border-bottom-left-radius: $rk-cal-month-border-radius;
-  }
+  cursor: $rk-cal-day-cursor;
 
-  .rk-cal__body__row:last-child &:last-child {
-    border-bottom-right-radius: $rk-cal-month-border-radius;
+  @if $rk-cal-day-border-radius == 0 {
+    .rk-cal__body__row:last-child &:first-child {
+      border-bottom-left-radius: $rk-cal-month-border-radius;
+    }
+
+    .rk-cal__body__row:last-child &:last-child {
+      border-bottom-right-radius: $rk-cal-month-border-radius;
+    }
   }
 }
 
