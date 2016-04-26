@@ -26,13 +26,28 @@
     this.basicCal = new Reckoning({ calendar: true });
     this.basicLocalizedCal = new Reckoning({ locale: 'ja', calendar: true });
 
+    var demoDateFrom = new Date(today);
+    var demoDateTo = new Date(today);
+
+    demoDateFrom.setDate(3);
+    demoDateTo.setDate(7);
+
     this.todayCal = new Reckoning({
       calendar: {
         today: today,
         startDate: today
       },
       ranges: {
-        today: { dates: today }
+        today: { dates: today },
+        demoToFrom: {
+          name: 'demo',
+          fromDate: demoDateFrom,
+          toDate: demoDateTo
+        },
+        demoEvery: {
+          name: 'weekend',
+          everyWeekday: [0,6]
+        }
       }
     });
 
@@ -92,19 +107,37 @@
 
   demo.view = function (ctrl) {
     return m('.calendar-demo-wrap', [
-      m('h1', 'Reckoning Calendar Examples'),
-      m('h4', 'Basic Calendar View'),
-      ctrl.basicCal.calendar.view(),
-      m('h4', 'Custom Locale Calendar'),
-      ctrl.basicLocalizedCal.calendar.view(),
-      m('h4', 'Highlight "Today" (Simple Range)'),
-      ctrl.todayCal.calendar.view(),
-      m('h4', 'Selections'),
-      ctrl.selectCal.calendar.view(),
-      m('h4', 'Shared Range Selections'),
-      ctrl.sharedRangeCal.calendar.view(),
-      m('h4', 'Invalid Ranges with Selections'),
-      ctrl.restrictedCal.calendar.view()
+      m('h1.demo-title', 'Reckoning Calendar Examples'),
+      m('.grid-cal', [
+        m('h4', 'Basic Calendar View'),
+        ctrl.basicCal.calendar.view(),
+      ]),
+      m('.grid-cal', [
+        m('h4', [
+          m('span', 'Custom Locale Calendar'),
+          m('span.demo-sub', '(Browser-Dependent)')
+        ]),
+        ctrl.basicLocalizedCal.calendar.view(),
+      ]),
+      m('.grid-cal', [
+        m('h4', [
+          m('span', 'Highlight Ranges'),
+          m('span.demo-sub', '(Simple Date, From/To)')
+        ]),
+        ctrl.todayCal.calendar.view(),
+      ]),
+      m('.grid-cal', [
+        m('h4', 'Selections'),
+        ctrl.selectCal.calendar.view(),
+      ]),
+      m('.grid-cal', [
+        m('h4', 'Shared Range Selections'),
+        ctrl.sharedRangeCal.calendar.view(),
+      ]),
+      m('.grid-cal', [
+        m('h4', 'Invalid Ranges with Selections'),
+        ctrl.restrictedCal.calendar.view()
+      ])
     ]);
   };
 

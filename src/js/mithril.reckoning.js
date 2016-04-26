@@ -32,6 +32,10 @@
   var hasOwn = {}.hasOwnProperty;
   var type = {}.toString;
 
+  function isDefined (value) {
+    return typeof value !== "undefined";
+  };
+
   function isFunction (object) {
     return typeof object === "function";
   };
@@ -543,7 +547,7 @@
       // (i.e. getDate() + 1)
       // others can be exact
       // for now, assume that this will be provided correctly
-      if (!value) return null;
+      if (!isDefined(value)) return null;
 
       var key = parseInt(value);
 
@@ -583,7 +587,7 @@
     },
 
     _getMapByRepeat: function (everyValue, type) {
-      if (!everyValue || isObject(everyValue)) return null;
+      if (!isDefined(everyValue) || isObject(everyValue)) return null;
 
       var map = {};
       var key;

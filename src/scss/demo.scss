@@ -1,6 +1,17 @@
 // themes
 @import 'theme-base/base';
 
+$demo-bg: #f7f7f7;
+$demo-padding: 20px;
+$demo-border-color: #c2c2c2;
+$demo-sub-color: #969696;
+
+$demo-today-bg: #cc241d;
+$demo-today-color: #fff;
+
+$demo-selected-bg: #689d6a;
+$demo-selected-color: $demo-bg;
+
 body {
   font-family: sans-serif;
   font-size: 100%;
@@ -8,28 +19,108 @@ body {
 
 // quick-n-dirty demo styles
 .calendar-demo-wrap {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #e2e2e2;
+  margin: $demo-padding auto;
+  padding: 1px ($demo-padding);
+  background: $demo-bg;
   color: #444;
+  border: 1px solid $demo-border-color;
+
+  &:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+}
+
+.demo-title {
+  padding: ($demo-padding / 2)
+}
+
+.grid-cal,
+.grid-cal--wide {
+  box-sizing: border-box;
+  display: block;
+  padding: 0 ($demo-padding / 2)
+}
+
+.demo-sub {
+  display: inline-block;
+  padding: 0 ($demo-padding / 2);
+  font-weight: initial;
+  font-size: 0.9em;
+  color: $demo-sub-color;
+}
+
+
+@media (min-width: 44em) {
+  .grid-cal {
+    display: inline-block;
+    width: 50%;
+  }
+  .grid-cal--wide {
+    display: inline-block;
+    width: 100%;
+  }
+}
+
+@media (min-width: 66em) {
+  .grid-cal {
+    width: 33.33%;
+  }
+  .grid-cal--wide {
+    width: 66.67%;
+  }
+}
+
+@media (min-width: 88em) {
+  .grid-cal {
+    width: 25%;
+  }
+  .grid-cal--wide {
+    width: 50%;
+  }
 }
 
 .is-not-month {
-  opacity: 0.3;
+  color: $demo-border-color;
 }
 
 // demo ranges
 .is-range-today {
-  background: #f2f2f2;
+  .rk-cal__day__num {
+    background: $demo-today-bg;
+    color: $demo-today-color;
+
+    display: inline-block;
+    border-radius: 50%;
+    margin: -1em;
+    line-height: 2;
+    height: 2em;
+    width: 2em;
+  }
+}
+
+.is-range-weekend {
+  color: $demo-border-color;
+  font-style: italic;
+}
+
+.is-range-demo {
+  border: 1px solid $demo-border-color;
+  font-weight: bold;
 }
 
 .is-range-selected {
-  background: blue;
-  color: white;
+  background: $demo-selected-bg;
+  color: $demo-selected-color;
 }
 
 .is-range-invalid {
-  background: #ccc;
-  color: #aaa;
+  background: $demo-bg;
+  color: $demo-sub-color;
+  cursor: not-allowed;
+
+  &.is-not-month {
+    opacity: 0.7;
+  }
 }

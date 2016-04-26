@@ -49,20 +49,6 @@ $rk-cal-head-font-size: $rk-cal-font-size !default;
 $rk-cal-head-alignment: $rk-cal-alignment !default;
 $rk-cal-head-line-height: inherit !default;
 
-$rk-cal-head-month-bg: none !default;
-$rk-cal-head-month-color: inherit !default;
-$rk-cal-head-month-padding: $rk-cal-head-padding !default;
-$rk-cal-head-month-alignment: inherit !default;
-$rk-cal-head-month-line-height: inherit !default;
-$rk-cal-head-month-height: auto !default;
-
-$rk-cal-head-weekday-bg: none !default;
-$rk-cal-head-weekday-color: inherit !default;
-$rk-cal-head-weekday-padding: $rk-cal-head-padding !default;
-$rk-cal-head-weekday-alignment: inherit !default;
-$rk-cal-head-weekday-line-height: inherit !default;
-$rk-cal-head-weekday-height: auto !default;
-
 $rk-cal-body-bg: $rk-cal-bg !default;
 $rk-cal-body-border-width: 0 !default;
 $rk-cal-body-border-style: $rk-cal-border-style !default;
@@ -83,6 +69,20 @@ $rk-cal-day-outline: none !default;
 $rk-cal-day-cursor: default !default;
 // this is arbtrary and fixed because calendars are a 5x7 grid
 $rk-cal-day-width: (100% / 7);
+
+$rk-cal-head-month-bg: none !default;
+$rk-cal-head-month-color: inherit !default;
+$rk-cal-head-month-padding: $rk-cal-head-padding !default;
+$rk-cal-head-month-alignment: inherit !default;
+$rk-cal-head-month-line-height: inherit !default;
+$rk-cal-head-month-height: auto !default;
+
+$rk-cal-head-weekday-bg: none !default;
+$rk-cal-head-weekday-color: inherit !default;
+$rk-cal-head-weekday-padding: $rk-cal-day-padding !default;
+$rk-cal-head-weekday-alignment: inherit !default;
+$rk-cal-head-weekday-line-height: inherit !default;
+$rk-cal-head-weekday-height: auto !default;
 
 // Calendar
 //
