@@ -1004,9 +1004,11 @@
       };
 
       return m('.rk-cal__controls', [
-        getView('previous'),
-        getView('reset'),
-        getView('next')
+        m('.rk-cal__controls__wrap', [
+          getView('previous'),
+          getView('reset'),
+          getView('next')
+        ])
       ]);
     }
   };

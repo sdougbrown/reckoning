@@ -112,24 +112,45 @@ $rk-cal-controls-button-width: initial !default;
 $rk-cal-controls-button-icon-size: inherit !default;
 $rk-cal-controls-button-line-height: $rk-cal-controls-button-height !default;
 $rk-cal-controls-button-border-radius: $rk-cal-border-radius !default;
+$rk-cal-controls-button-vertical-align: middle !default;
+
+$rk-cal-controls-wrap-float: none !default;
 
 $rk-cal-controls-previous-float: none !default;
+$rk-cal-controls-previous-margin: $rk-cal-controls-button-margin !default;
 $rk-cal-controls-previous-before-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-previous-after-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-previous-before-content: none !default;
 $rk-cal-controls-previous-after-content: none !default;
+$rk-cal-controls-previous-position: static !default;
+$rk-cal-controls-previous-bottom: auto !default;
+$rk-cal-controls-previous-right: auto !default;
+$rk-cal-controls-previous-left: auto !default;
+$rk-cal-controls-previous-top: auto !default;
 
 $rk-cal-controls-reset-float: none !default;
+$rk-cal-controls-reset-margin: $rk-cal-controls-button-margin !default;
 $rk-cal-controls-reset-before-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-reset-after-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-reset-before-content: none !default;
 $rk-cal-controls-reset-after-content: none !default;
+$rk-cal-controls-reset-position: static !default;
+$rk-cal-controls-reset-bottom: auto !default;
+$rk-cal-controls-reset-right: auto !default;
+$rk-cal-controls-reset-left: auto !default;
+$rk-cal-controls-reset-top: auto !default;
 
 $rk-cal-controls-next-float: none !default;
+$rk-cal-controls-next-margin: $rk-cal-controls-button-margin !default;
 $rk-cal-controls-next-before-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-next-after-size: $rk-cal-controls-button-icon-size !default;
 $rk-cal-controls-next-before-content: none !default;
 $rk-cal-controls-next-after-content: none !default;
+$rk-cal-controls-next-position: static !default;
+$rk-cal-controls-next-bottom: auto !default;
+$rk-cal-controls-next-right: auto !default;
+$rk-cal-controls-next-left: auto !default;
+$rk-cal-controls-next-top: auto !default;
 
 // Calendar
 //
@@ -269,6 +290,10 @@ $rk-cal-controls-next-after-content: none !default;
   top: $rk-cal-controls-top;
 }
 
+.rk-cal__controls__wrap {
+  float: $rk-cal-controls-wrap-float;
+}
+
 // button
 %rk-cal__controls__button {
   color: $rk-cal-controls-button-color;
@@ -277,6 +302,7 @@ $rk-cal-controls-next-after-content: none !default;
   width: $rk-cal-controls-button-width;
   border-radius: $rk-cal-controls-button-border-radius;
   outline: $rk-cal-controls-button-outline;
+  vertical-align: $rk-cal-controls-button-vertical-align;
 
   @if $rk-cal-controls-button-appearance != initial {
     -webkit-appearance: $rk-cal-controls-button-appearance;
@@ -299,7 +325,15 @@ $rk-cal-controls-next-after-content: none !default;
 .rk-cal__controls__previous {
   @extend %rk-cal__controls__button;
   float: $rk-cal-controls-previous-float;
+  position: $rk-cal-controls-previous-position;
+  bottom: $rk-cal-controls-previous-bottom;
+  right: $rk-cal-controls-previous-right;
+  left: $rk-cal-controls-previous-left;
+  top: $rk-cal-controls-previous-top;
 
+  @if $rk-cal-controls-previous-margin != $rk-cal-controls-button-margin {
+    margin: $rk-cal-controls-previous-margin;
+  }
   @if $rk-cal-controls-previous-before-content != none {
     &:before {
       font-size: $rk-cal-controls-previous-before-size;
@@ -317,7 +351,15 @@ $rk-cal-controls-next-after-content: none !default;
 .rk-cal__controls__reset {
   @extend %rk-cal__controls__button;
   float: $rk-cal-controls-reset-float;
+  position: $rk-cal-controls-reset-position;
+  bottom: $rk-cal-controls-reset-bottom;
+  right: $rk-cal-controls-reset-right;
+  left: $rk-cal-controls-reset-left;
+  top: $rk-cal-controls-reset-top;
 
+  @if $rk-cal-controls-reset-margin != $rk-cal-controls-button-margin {
+    margin: $rk-cal-controls-reset-margin;
+  }
   @if $rk-cal-controls-reset-before-content != none {
     &:before {
       font-size: $rk-cal-controls-reset-before-size;
@@ -335,7 +377,15 @@ $rk-cal-controls-next-after-content: none !default;
 .rk-cal__controls__next {
   @extend %rk-cal__controls__button;
   float: $rk-cal-controls-next-float;
+  position: $rk-cal-controls-next-position;
+  bottom: $rk-cal-controls-next-bottom;
+  right: $rk-cal-controls-next-right;
+  left: $rk-cal-controls-next-left;
+  top: $rk-cal-controls-next-top;
 
+  @if $rk-cal-controls-next-margin != $rk-cal-controls-button-margin {
+    margin: $rk-cal-controls-next-margin;
+  }
   @if $rk-cal-controls-next-before-content != none {
     &:before {
       font-size: $rk-cal-controls-next-before-size;

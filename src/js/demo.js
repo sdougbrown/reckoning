@@ -118,7 +118,7 @@
         controls: {
           previous: true,
           next: true,
-          reset: 'TODAY'
+          reset: true
         },
         onDayClick: this.toggleDateSelection,
         numberOfMonths: 2,
