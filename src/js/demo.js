@@ -120,9 +120,14 @@
           next: true,
           reset: 'TODAY'
         },
+        onDayClick: this.toggleDateSelection,
         numberOfMonths: 2,
         today: today,
         startDate: today
+      },
+      ranges: {
+        today: { dates: today },
+        selected: {}
       }
     });
   };

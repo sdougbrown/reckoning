@@ -103,6 +103,7 @@ $rk-cal-controls-top: 0 !default;
 $rk-cal-controls-button-appearance: initial !default;
 $rk-cal-controls-button-bg: initial !default;
 $rk-cal-controls-button-color: $rk-cal-color !default;
+$rk-cal-controls-button-outline: none !default;
 $rk-cal-controls-button-border: initial !default;
 $rk-cal-controls-button-padding: initial !default;
 $rk-cal-controls-button-margin: $rk-cal-head-padding !default;
@@ -275,6 +276,7 @@ $rk-cal-controls-next-after-content: none !default;
   height: $rk-cal-controls-button-height;
   width: $rk-cal-controls-button-width;
   border-radius: $rk-cal-controls-button-border-radius;
+  outline: $rk-cal-controls-button-outline;
 
   @if $rk-cal-controls-button-appearance != initial {
     -webkit-appearance: $rk-cal-controls-button-appearance;
