@@ -1,5 +1,7 @@
 // themes
-@import 'theme-base/base';
+$screen-sm: 44em;
+$screen-md: 66em;
+$screen-lg: 88em;
 
 $demo-bg: #f7f7f7;
 $demo-padding: 20px;
@@ -11,6 +13,8 @@ $demo-today-color: #fff;
 
 $demo-selected-bg: #689d6a;
 $demo-selected-color: $demo-bg;
+
+@import 'theme-base/base';
 
 body {
   font-family: sans-serif;
@@ -25,6 +29,8 @@ body {
   color: #444;
   border: 1px solid $demo-border-color;
 
+  text-align: center;
+
   &:after {
     content: "";
     clear: both;
@@ -33,14 +39,17 @@ body {
 }
 
 .demo-title {
-  padding: ($demo-padding / 2)
+  padding: ($demo-padding / 2);
+  text-align: left;
 }
 
 .grid-cal,
 .grid-cal--wide {
   box-sizing: border-box;
   display: block;
-  padding: 0 ($demo-padding / 2)
+  padding: 0 ($demo-padding / 2);
+  vertical-align: top;
+  text-align: left;
 }
 
 .demo-sub {
@@ -52,7 +61,7 @@ body {
 }
 
 
-@media (min-width: 44em) {
+@media (min-width: $screen-sm) {
   .grid-cal {
     display: inline-block;
     width: 50%;
@@ -63,7 +72,7 @@ body {
   }
 }
 
-@media (min-width: 66em) {
+@media (min-width: $screen-md) {
   .grid-cal {
     width: 33.33%;
   }
@@ -72,7 +81,7 @@ body {
   }
 }
 
-@media (min-width: 88em) {
+@media (min-width: $screen-lg) {
   .grid-cal {
     width: 25%;
   }

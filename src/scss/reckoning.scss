@@ -6,6 +6,11 @@
 //
 // Covers Calendars, Controls, Timeline
 
+$screen-sm: 44em !default;
+$screen-md: 66em !default;
+$screen-lg: 88em !default;
+
+$rk-cal-position: relative !default;
 $rk-cal-bg: none !default;
 $rk-cal-color: inherit !default;
 $rk-cal-width: auto !default;
@@ -23,6 +28,7 @@ $rk-cal-alignment: center !default;
 $rk-cal-line-height: inherit !default;
 $rk-cal-outline: none !default;
 
+$rk-cal-month-display: table !default;
 $rk-cal-month-bg: $rk-cal-bg !default;
 $rk-cal-month-color: inherit !default;
 $rk-cal-month-width: 100% !default;
@@ -35,6 +41,7 @@ $rk-cal-month-border-width: 0 !default;
 $rk-cal-month-border-style: $rk-cal-border-style !default;
 $rk-cal-month-border-color: $rk-cal-bg !default;
 $rk-cal-month-border: $rk-cal-month-border-width $rk-cal-month-border-style $rk-cal-month-border-color !default;
+$rk-cal-multi-month-border: $rk-cal-month-border !default;
 
 $rk-cal-head-bg: $rk-cal-bg !default;
 $rk-cal-head-color: $rk-cal-color !default;
@@ -76,6 +83,7 @@ $rk-cal-head-month-padding: $rk-cal-head-padding !default;
 $rk-cal-head-month-alignment: inherit !default;
 $rk-cal-head-month-line-height: inherit !default;
 $rk-cal-head-month-height: auto !default;
+$rk-cal-head-month-visibility: visible !default
 
 $rk-cal-head-weekday-bg: none !default;
 $rk-cal-head-weekday-color: inherit !default;
@@ -84,12 +92,51 @@ $rk-cal-head-weekday-alignment: inherit !default;
 $rk-cal-head-weekday-line-height: inherit !default;
 $rk-cal-head-weekday-height: auto !default;
 
+$rk-cal-controls-position: absolute !default;
+$rk-cal-controls-width: 100% !default;
+$rk-cal-controls-height: 0 !default;
+$rk-cal-controls-bottom: auto !default;
+$rk-cal-controls-right: 0 !default;
+$rk-cal-controls-left: 0 !default;
+$rk-cal-controls-top: 0 !default;
+
+$rk-cal-controls-button-appearance: initial !default;
+$rk-cal-controls-button-bg: initial !default;
+$rk-cal-controls-button-color: $rk-cal-color !default;
+$rk-cal-controls-button-border: initial !default;
+$rk-cal-controls-button-padding: initial !default;
+$rk-cal-controls-button-margin: $rk-cal-head-padding !default;
+$rk-cal-controls-button-height: initial !default;
+$rk-cal-controls-button-width: initial !default;
+$rk-cal-controls-button-icon-size: inherit !default;
+$rk-cal-controls-button-line-height: $rk-cal-controls-button-height !default;
+$rk-cal-controls-button-border-radius: $rk-cal-border-radius !default;
+
+$rk-cal-controls-previous-float: none !default;
+$rk-cal-controls-previous-before-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-previous-after-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-previous-before-content: none !default;
+$rk-cal-controls-previous-after-content: none !default;
+
+$rk-cal-controls-reset-float: none !default;
+$rk-cal-controls-reset-before-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-reset-after-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-reset-before-content: none !default;
+$rk-cal-controls-reset-after-content: none !default;
+
+$rk-cal-controls-next-float: none !default;
+$rk-cal-controls-next-before-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-next-after-size: $rk-cal-controls-button-icon-size !default;
+$rk-cal-controls-next-before-content: none !default;
+$rk-cal-controls-next-after-content: none !default;
+
 // Calendar
 //
 // A semantic table, with styling hooks.
 // The parent .rk-cal element could wrap multiple
 // month elements.
 .rk-cal {
+  position: $rk-cal-position;
   background: $rk-cal-bg;
   color: $rk-cal-color;
   width: $rk-cal-width;
@@ -110,6 +157,7 @@ $rk-cal-head-weekday-height: auto !default;
 
 // table
 .rk-cal__month {
+  display: $rk-cal-month-display;
   background: $rk-cal-month-bg;
   color: $rk-cal-month-color;
   width: $rk-cal-month-width;
@@ -152,6 +200,8 @@ $rk-cal-head-weekday-height: auto !default;
 
   text-align: $rk-cal-head-month-alignment;
   line-height: $rk-cal-head-month-line-height;
+
+  visibility: $rk-cal-head-month-visibility;
 }
 
 // th
@@ -207,3 +257,136 @@ $rk-cal-head-weekday-height: auto !default;
 // span
 .rk-cal__day__num {}
 
+// div
+.rk-cal__controls {
+  position: $rk-cal-controls-position;
+  height: $rk-cal-controls-height;
+  width: $rk-cal-controls-width;
+  bottom: $rk-cal-controls-bottom;
+  right: $rk-cal-controls-right;
+  left: $rk-cal-controls-left;
+  top: $rk-cal-controls-top;
+}
+
+// button
+%rk-cal__controls__button {
+  color: $rk-cal-controls-button-color;
+  margin: $rk-cal-controls-button-margin;
+  height: $rk-cal-controls-button-height;
+  width: $rk-cal-controls-button-width;
+  border-radius: $rk-cal-controls-button-border-radius;
+
+  @if $rk-cal-controls-button-appearance != initial {
+    -webkit-appearance: $rk-cal-controls-button-appearance;
+    appearance: $rk-cal-controls-button-appearance;
+  }
+  @if $rk-cal-controls-button-bg != initial {
+    background: $rk-cal-controls-button-bg;
+  }
+  @if $rk-cal-controls-button-line-height != auto {
+    line-height: $rk-cal-controls-button-line-height;
+  }
+  @if $rk-cal-controls-button-border != initial {
+    border: $rk-cal-controls-button-border;
+  }
+  @if $rk-cal-controls-button-padding != initial {
+    padding: $rk-cal-controls-button-padding;
+  }
+}
+
+.rk-cal__controls__previous {
+  @extend %rk-cal__controls__button;
+  float: $rk-cal-controls-previous-float;
+
+  @if $rk-cal-controls-previous-before-content != none {
+    &:before {
+      font-size: $rk-cal-controls-previous-before-size;
+      content: $rk-cal-controls-previous-before-content;
+    }
+  }
+  @if $rk-cal-controls-previous-after-content != none {
+    &:after {
+      font-size: $rk-cal-controls-previous-after-size;
+      content: $rk-cal-controls-previous-after-content;
+    }
+  }
+}
+
+.rk-cal__controls__reset {
+  @extend %rk-cal__controls__button;
+  float: $rk-cal-controls-reset-float;
+
+  @if $rk-cal-controls-reset-before-content != none {
+    &:before {
+      font-size: $rk-cal-controls-reset-before-size;
+      content: $rk-cal-controls-reset-before-content;
+    }
+  }
+  @if $rk-cal-controls-reset-after-content != none {
+    &:after {
+      font-size: $rk-cal-controls-reset-after-size;
+      content: $rk-cal-controls-reset-after-content;
+    }
+  }
+}
+
+.rk-cal__controls__next {
+  @extend %rk-cal__controls__button;
+  float: $rk-cal-controls-next-float;
+
+  @if $rk-cal-controls-next-before-content != none {
+    &:before {
+      font-size: $rk-cal-controls-next-before-size;
+      content: $rk-cal-controls-next-before-content;
+    }
+  }
+  @if $rk-cal-controls-next-after-content != none {
+    &:after {
+      font-size: $rk-cal-controls-next-after-size;
+      content: $rk-cal-controls-next-after-content;
+    }
+  }
+}
+
+@media (min-width: $screen-sm) {
+  .rk-cal__month.is-1-of-2,
+  .rk-cal__month.is-2-of-2 {
+    display: inline-table;
+    width: 50%;
+  }
+
+  .rk-cal__month.is-1-of-4 {
+    &, & ~ .rk-cal__month {
+      display: inline-table;
+      width: 50%;
+    }
+  }
+
+  .rk-cal__month.is-2-of-2 {
+    border-left: $rk-cal-multi-month-border;
+  }
+}
+
+@media (min-width: $screen-md) {
+  .rk-cal__month.is-1-of-3 {
+    &, & ~ .rk-cal__month {
+      display: inline-table;
+      width: 33.3%;
+    }
+    & ~ .rk-cal__month {
+      border-left: $rk-cal-multi-month-border;
+    }
+  }
+}
+
+@media (min-width: $screen-lg) {
+  .rk-cal__month.is-1-of-4 {
+    &, & ~ .rk-cal__month {
+      display: inline-table;
+      width: 25%;
+    }
+    & ~ .rk-cal__month {
+      border-left: $rk-cal-multi-month-border;
+    }
+  }
+}

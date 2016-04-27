@@ -7,12 +7,27 @@ $base-border-color: #c2c2c2;
 $rk-cal-bg: $base-alt-bg;
 $rk-cal-color: $base-color;
 $rk-cal-margin: 0 auto ($base-spacing * 2);
-$rk-cal-padding: ($base-spacing/2) 0 0;
+$rk-cal-padding: 0;
 $rk-cal-line-height: ($base-spacing * 2);
 $rk-cal-border-width: 1px;
 $rk-cal-border-color: $base-border-color;
 $rk-cal-body-bg: $base-bg;
 $rk-cal-month-padding: $base-spacing;
 $rk-cal-day-padding: $base-spacing 0;
+$rk-cal-multi-month-border: $rk-cal-border-width solid $rk-cal-border-color;
+
+$rk-cal-controls-button-bg: $base-bg;
+$rk-cal-controls-button-border: $rk-cal-border-width solid $rk-cal-border-color;
+$rk-cal-controls-button-height: ($rk-cal-line-height + $base-spacing);
+$rk-cal-controls-button-line-height: ($rk-cal-controls-button-height - 3);
+$rk-cal-controls-button-padding: 0 $base-spacing;
+$rk-cal-controls-button-icon-size: 1.8em;
+$rk-cal-controls-previous-float: left;
+$rk-cal-controls-reset-float: left;
+$rk-cal-controls-next-float: right;
+
+$rk-cal-controls-previous-before-content: "\2039";
+$rk-cal-controls-next-after-content: "\203A";
 
 @import '../reckoning.scss';
+

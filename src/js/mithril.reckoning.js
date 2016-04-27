@@ -1,18 +1,18 @@
 (function (global, factory) {
 
   var Reckoning = factory(global);
-  var reckoning = new Reckoning({ string: { weekday: 'long' } });
+  var rk = new Reckoning({ string: { weekday: 'long' } });
 
   // bind to the global scope without polyfills
   if (typeof module === "object" && module != null && module.exports) {
     module.exports = Reckoning;
-    module.exports = reckoning;
+    module.exports = rk;
   } else if (typeof define === "function" && define.amd) {
     define(function () { return Reckoning; });
-    define(function () { return reckoning; });
+    define(function () { return rk; });
   } else {
     global.Reckoning = Reckoning;
-    global.reckoning = reckoning;
+    global.rk = rk;
   }
 
 })(typeof window !== "undefined" ? window : {}, function (global) {
@@ -78,15 +78,11 @@
   function mapViewModel (ops) {
     var map = {};
 
-    return function(key) {
-      if (!map[key]) {
-        map[key] = {};
-        for (var prop in ops) {
-          map[key][prop] = m.prop(ops[prop]());
-        }
-      }
-      return map[key]
-    };
+    for (var prop in ops) {
+      map[prop] = m.prop(ops[prop]);
+    }
+
+    return map;
   };
 
   function subMod(mod, attrs) {
@@ -98,6 +94,8 @@
 
     return nav.languages || nav.userLanguage || nav.language || 'en-US';
   };
+
+  function noop () {};
 
 
   // use clever native locale strings, if supported
@@ -127,8 +125,11 @@
 
     this.ranges = (!!attrs.mappedRanges) ? attrs.mappedRanges : this._mapRanges(attrs.ranges);
     this.string = assign(this.defaults.string, attrs.string);
-    this.days = (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays());
-    this.months = (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths());
+
+    this.model = {
+      days: (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays()),
+      months: (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths())
+    };
 
     if (attrs.calendar) {
       this.calendar = new Calendar(this, assign(this.defaults.calendar, attrs.calendar));
@@ -170,6 +171,7 @@
       },
 
       calendar: {
+        controls: false,
         today: null,
         dayView: null,
         numberOfMonths: 1,
@@ -185,6 +187,13 @@
         month: 'long', // narrow/short/long
         year: 'numeric',
         day: 'numeric'
+      },
+
+      controls: {
+        previous: true,
+        reset: false,
+        next: true,
+        list: false
       }
     },
 
@@ -434,8 +443,9 @@
 
 
   // child constructors
-  var DateRange = function (parent, range, ops) {
-    this.parent = parent;
+  var DateRange = function (rk, range, ops) {
+    this.parent = rk;
+    this.model = rk.model;
 
     range = range || {};
     ops = ops || {};
@@ -468,11 +478,12 @@
     },
 
     setDate: function (date, value) {
-      date = this.parent.parse(date);
+      var rk = this.parent;
+      date = rk.parse(date);
       if (!date) return;
 
       // assigns value, or toggles if no value
-      this.byDate[this.parent._getDateKey(date)] = (value) ? value : !this.byDate[this.parent._getDateKey(date)];
+      this.byDate[rk._getDateKey(date)] = (value) ? value : !this.byDate[rk._getDateKey(date)];
     },
 
     addDate: function (date) {
@@ -491,10 +502,11 @@
 
     // if city, population: you
     inRange: function (date) {
-      date = this.parent.parse(date);
+      var rk = this.parent;
+      date = rk.parse(date);
       if (!date) return false;
 
-      var isMatch = !!this.byDate[this.parent._getDateKey(date)];
+      var isMatch = !!this.byDate[rk._getDateKey(date)];
       if (isMatch) return isMatch;
 
       if (this._toDate || this._fromDate) {
@@ -556,12 +568,12 @@
       }
 
       if (type === 'month') {
-        var index = this.parent.months().indexOf(value);
+        var index = this.model.months().indexOf(value);
         return (index > -1) ? index + 1 : null;
       }
 
       if (type === 'weekday') {
-        var index = this.parent.days().indexOf(value);
+        var index = this.model.days().indexOf(value);
         return (index > -1) ? index : null;
       }
 
@@ -614,8 +626,9 @@
     }
   };
 
-  var Timeline = function (parent, ops) {
-    this.parent = parent;
+  var Timeline = function (rk, ops) {
+    this.parent = rk;
+    this.model = rk.model;
   };
 
   Timeline.prototype = {
@@ -628,28 +641,34 @@
     }
   };
 
-  var Calendar = function (parent, ops) {
-    this.parent = parent;
+  var Calendar = function (rk, ops) {
+    this.parent = rk;
+    this.model = rk.model;
 
     this._onFocus = ops.onFocus;
     this._onDayClick = ops.onDayClick;
     this._onDayKeydown = ops.onDayKeydown;
 
     var startDate = this.parent.parse(ops.startDate);
+    var controls = (ops.controls) ? assign(this.parent.defaults.controls, ops.controls) : null;
 
     this.calendarMonths = [];
+    this.calendarControls = this._createControls(controls);
+
     this.today = m.prop(this.parent.parse(ops.today) || new Date());
     this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
     this.vm = {
+      advanceBy: m.prop(1),
+      resetDate: m.prop(startDate || this.today()),
       numberOfMonths: m.prop(ops.numberOfMonths),
       startWeekOnDay: m.prop(ops.startWeekOnDay),
       year: m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear()),
       month: m.prop((!!startDate) ? startDate.getMonth() : ops.month)
     };
 
-    this.weekdays = m.prop(this.getWeekdayOrder());
-    this.updateMonths();
+    this.model.weekdays = m.prop(this.getWeekdayOrder());
+    this.updateMonths(this.calendarMonths);
 
     this.dayView = ops.dayView || this._dayView;
     this.view = this._view.bind(this, this);
@@ -658,24 +677,74 @@
   Calendar.prototype = {
     constructor: Calendar,
 
-    updateMonths: function () {
+    advance: function (amount) {
+      if (!isDefined(amount) || !parseInt(amount)) return false;
+
+      var vm = this.vm;
+      var newDate = this.getModifiedDate(vm.month() + amount, vm.year());
+      vm.month(newDate.month);
+      vm.year(newDate.year);
+      this.updateMonths(this.calendarMonths);
+    },
+
+    previous: function () {
+      this.advance(this.vm.advanceBy() * -1);
+    },
+
+    next: function () {
+      this.advance(this.vm.advanceBy());
+    },
+
+    reset: function () {
+      var vm = this.vm;
+
+      vm.month(vm.resetDate().getMonth());
+      vm.year(vm.resetDate().getFullYear());
+      this.updateMonths(this.calendarMonths);
+    },
+
+    updateMonths: function (months) {
+      months = months || this.calendarMonths;
+      var vm = this.vm;
+      var rk = this.parent;
+      var total = vm.numberOfMonths();
       // this should check the month value (>0, <12)
       // and set the month/year index accordingly
-      for (var i = 0; i < this.vm.numberOfMonths(); i++) {
-        this.calendarMonths[i] = subMod(Month, {
+      for (var i = 0, monthyear, date; i < total; i++) {
+        monthyear = this.getModifiedDate(vm.month() + i, vm.year());
+        date = new Date(monthyear.year, monthyear.month, 1);
+        months[i] = subMod(Month, {
+          model: this.model,
           calendar: this,
-          ranges: this.parent.ranges,
-          months: this.parent.months,
-          month: this.vm.month() + i,
-          year: this.vm.year()
+          title: rk.format(date, { string: { month: rk.string.month, year: rk.string.year } }),
+          ranges: rk.ranges,
+          month: monthyear.month,
+          year: monthyear.year,
+          counter: i + 1,
+          total: total
         });
       }
     },
 
+    getModifiedDate: function (month, year) {
+      var yearDiff = 0;
+      if (month < 0 || month > 11) {
+        yearDiff = Math.floor(month / 11);
+        month = Math.abs(month - (12 * yearDiff));
+      }
+
+      return {
+        month: month,
+        year: year + yearDiff
+      };
+    },
+
     getWeekdayOrder: function () {
+      var days = this.model.days();
+      var startDay = this.vm.startWeekOnDay();
       return [].concat(
-        this.parent.days().slice(this.vm.startWeekOnDay()),
-        this.parent.days().slice(0, this.vm.startWeekOnDay())
+        days.slice(startDay),
+        days.slice(0, startDay)
       );
     },
 
@@ -699,11 +768,22 @@
       return this.parent.format(date, { string: { day: 'numeric' } });
     },
 
+    _createControls: function (ops) {
+      if (!ops) return null;
+
+      return subMod(Controls, {
+        calendar: this,
+        model: this.model,
+        vm: ops
+      })
+    },
+
     _view: function (ctrl) {
       return m('.rk-cal', {
         onfocus: ctrl.onFocus.bind(ctrl),
         tabindex: '0'
       }, [
+        (ctrl.calendarControls) ? ctrl.calendarControls() : '',
         ctrl.calendarMonths.map(function(monthView) {
           return monthView();
         })
@@ -717,30 +797,41 @@
 
   var Month = {
     controller: function (attrs) {
+      this.model = attrs.model;
       this.calendar = attrs.calendar;
       this.ranges = attrs.ranges;
-      this.months = attrs.months;
       this.month = attrs.month;
       this.year = attrs.year;
 
-      this.days = [];
-      this.dates = {};
-      this.weeks = this.mapWeeks({ dates: this.dates, days: this.days });
+      var dates = {};
+      var days = [];
+
+      this.vm = {
+        title: m.prop(attrs.title),
+        className: m.prop('is-'+attrs.counter+'-of-'+attrs.total),
+        // object refs rather than props
+        weeks: this.mapWeeks({ dates: dates, days: days }),
+        dates: dates,
+        days: days
+      };
     },
     view: function (ctrl) {
-      return m('table.rk-cal__month', { role: 'grid' }, [
+      var vm = ctrl.vm;
+      var model = ctrl.model;
+
+      return m('table.rk-cal__month', { className: vm.className(), role: 'grid' }, [
         m('thead.rk-cal__head', { role: 'rowgroup' }, [
           m('tr.rk-cal__head__row', {
             role: 'row',
             className: 'rk-cal__head__row--month'
           }, [
-            m('th.rk-cal__head__month', { colspan: 7 }, ctrl.months()[ctrl.month])
+            m('th.rk-cal__head__month', { colspan: 7 }, vm.title()),
           ]),
           m('tr.rk-cal__head__row', {
             role: 'row',
             className: 'rk-cal__head__row--weekday'
           }, [
-            ctrl.calendar.weekdays().map(function(day) {
+            model.weekdays().map(function(day) {
               return m('th.rk-cal__head__weekday', [
                 m('span', { role: 'columnheader' }, day)
               ]);
@@ -748,7 +839,7 @@
           ])
         ]),
         m('tbody.rk-cal__body', { role: 'rowgroup' }, [
-          ctrl.weeks.map(function(week) {
+          vm.weeks.map(function(week) {
             return m('tr.rk-cal__body__row', { role: 'row' }, [
               week.map(function(day) {
                 return day.view();
@@ -810,12 +901,12 @@
     this.indexes = attrs.indexes;
     this.key = attrs.key;
 
-    this.vm = {
-      focus: m.prop(false),
-      tabindex: m.prop(-1),
-      inFocusClassName: m.prop(''),
-      inMonthClassName: m.prop((this.month === this.date.getMonth()) ? ' is-month' : ' is-not-month')
-    };
+    this.vm = mapViewModel({
+      focus: false,
+      tabindex: -1,
+      inFocusClassName: '',
+      inMonthClassName: (this.month === this.date.getMonth()) ? ' is-month' : ' is-not-month'
+    });
 
     // this is kind of weird...
     this.view = this._view.bind(this, this);
@@ -828,14 +919,16 @@
     },
 
     classNames: function () {
-      return this.vm.inFocusClassName() + this.vm.inMonthClassName() + this.inRangeClassNames();
+      var vm = this.vm;
+      return vm.inFocusClassName() + vm.inMonthClassName() + this.inRangeClassNames();
     },
 
     inRangeClassNames: function () {
-      var className = '';
+      var range, className = '';
       for (var prop in this.ranges) {
-        if (this.ranges[prop].inRange(this.date)) {
-          className += ' is-range-' + this.ranges[prop].name;
+        range = this.ranges[prop];
+        if (range.inRange(this.date)) {
+          className += ' is-range-' + range.name;
         }
       }
       return className;
@@ -874,6 +967,61 @@
         m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, this.calendar.getDisplayDate(ctrl.date)),
         ctrl.calendar.dayView(ctrl.date)
       ]);
+    }
+  };
+
+  var Controls = {
+    controller: function (ops) {
+      this.calendar = ops.calendar;
+      this.model = ops.model;
+
+      this.vm = {};
+      this.views = {};
+      for (var prop in ops.vm) {
+        var setting = ops.vm[prop];
+        if (isFunction(setting)) {
+          this.views[prop] = setting;
+        }
+        if (isString(setting)) {
+          this.views[prop] = m.prop(setting);
+        }
+        this.vm[prop] = m.prop(!!setting);
+      }
+    },
+
+    view: function (ctrl) {
+      var views = ctrl.views;
+      var vm = ctrl.vm;
+
+      var getView = function (name) {
+        if (!vm[name]()) return '';
+
+        var onClick = ctrl.onClick[name] || noop;
+        return m('button.rk-cal__controls__'+name, {
+          'aria-label': name,
+          onclick: onClick.bind(ctrl)
+        }, (views[name]) ? views[name]() : '');
+      };
+
+      return m('.rk-cal__controls', [
+        getView('previous'),
+        getView('reset'),
+        getView('next')
+      ]);
+    }
+  };
+
+  Controls.controller.prototype = {
+    onClick: {
+      next: function () {
+        this.calendar.next();
+      },
+      previous: function () {
+        this.calendar.previous();
+      },
+      reset: function () {
+        this.calendar.reset();
+      }
     }
   };
 

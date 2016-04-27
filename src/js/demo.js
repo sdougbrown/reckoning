@@ -66,6 +66,7 @@
       calendar: {
         today: today,
         startDate: today,
+        startWeekOnDay: 1,
         onDayClick: this.toggleDateSelection
       },
       mappedRanges: this.selectCal.ranges
@@ -103,6 +104,27 @@
         }
       }
     });
+
+    this.controlCal = new Reckoning({
+      calendar: {
+        controls: true,
+        today: today,
+        startDate: today
+      }
+    });
+
+    this.multiMonthCal = new Reckoning({
+      calendar: {
+        controls: {
+          previous: true,
+          next: true,
+          reset: 'TODAY'
+        },
+        numberOfMonths: 2,
+        today: today,
+        startDate: today
+      }
+    });
   };
 
   demo.view = function (ctrl) {
@@ -114,14 +136,14 @@
       ]),
       m('.grid-cal', [
         m('h4', [
-          m('span', 'Custom Locale Calendar'),
+          'Custom Locale Calendar',
           m('span.demo-sub', '(Browser-Dependent)')
         ]),
         ctrl.basicLocalizedCal.calendar.view(),
       ]),
       m('.grid-cal', [
         m('h4', [
-          m('span', 'Highlight Ranges'),
+          'Highlight Ranges',
           m('span.demo-sub', '(Simple Date, From/To)')
         ]),
         ctrl.todayCal.calendar.view(),
@@ -137,6 +159,14 @@
       m('.grid-cal', [
         m('h4', 'Invalid Ranges with Selections'),
         ctrl.restrictedCal.calendar.view()
+      ]),
+      m('.grid-cal', [
+        m('h4', 'Calendar Controls'),
+        ctrl.controlCal.calendar.view()
+      ]),
+      m('.grid-cal--wide', [
+        m('h4', 'Multi-Month Calendar'),
+        ctrl.multiMonthCal.calendar.view()
       ])
     ]);
   };
