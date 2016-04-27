@@ -137,6 +137,8 @@
     if (attrs.timeline) {
       this.timeline = new Timeline(this, assign(this.defaults.timeline, attrs.timeline));
     }
+
+    this.view = this._view.bind(this, this);
   };
 
   Reckoning.prototype = {
@@ -438,6 +440,13 @@
       if (!date) return null;
 
       return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    },
+
+    _view: function (ctrl) {
+      return m('.rk', [
+        (ctrl.timeline) ? ctrl.timeline.view() : '',
+        (ctrl.calendar) ? ctrl.calendar.view() : ''
+      ]);
     }
   };
 
