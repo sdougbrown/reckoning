@@ -1,40 +1,42 @@
 {
-  "name": "mithril-reckoning",
+  "name": "reckoning",
+  "description": "Reckoning - A Legendary Javascript Calendar",
   "version": "0.0.0",
-  "description": "Mithril Reckoning - A Legendary Javascript Calendar",
-  "main": "mithril-reckoning.js",
-  "scripts": {
-    "clean": "rimraf ./dist/* && rimraf ./demo/*",
-    "prebuild": "npm run clean",
-    "build:js": "copyfiles -u 2 ./src/js/mithril.reckoning.js ./dist",
-    "build:css": "node-sass --include-path ./node_modules --output-style compressed ./src/scss/demo.scss ./demo/css/demo.css && postcss --use autoprefixer -b 'last 2 versions' ./demo/css/demo.css -r true",
-    "build:demojs": "copyfiles -u 2 ./src/js/*.js ./demo/js",
-    "build:html": "copyfiles -u 1 ./src/index.html ./demo",
-    "build:favicon": "copyfiles -u 1 ./src/favicon.ico ./demo",
-    "build:bower": "copyfiles -u 2 ./bower_components/mithril/mithril.min.js ./demo/vendor/js && copyfiles -u 2 ./bower_components/mithril/mithril.min.js.map ./demo/vendor/js",
-    "build": "npm run build:css && npm run build:js && npm run build:html && npm build:favicon && npm build:bower",
-    "watch:css": "watch 'npm run build:css' ./src/scss/",
-    "watch:js": "watch 'npm run build:demojs' ./src/js/",
-    "watch:html": "watch 'npm run build:html' ./src/",
-    "watch": "parallelshell \"npm run watch:css -s\" \"npm run watch:js -s\" \"npm run watch:html -s\"",
-    "serve": "http-server -p 9090 ./demo/",
-    "dev": "npm run clean && npm run build:favicon && npm run build:bower && npm run build:demojs && parallelshell \"npm run watch\" \"npm run serve\"",
-    "test": "todo..."
-  },
+  "homepage": "http://reckoning.douggo.com",
+  "license": "MIT",
   "author": {
     "name": "Doug Brown"
   },
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sdougbrown/reckoning.git"
+  },
+  "bugs": {
+    "url": "http://github.com/sdougbrown/reckoning/issues"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "main": "mithril-reckoning.js",
   "devDependencies": {
-    "autoprefixer": "^6.0.3",
-    "copyfiles": "^0.2.1",
-    "http-server": "^0.8.5",
-    "node-sass": "^3.4.1",
-    "normalize-sass": "^1.0.0",
-    "opener": "^1.4.1",
-    "parallelshell": "^2.0.0",
-    "postcss-cli": "^2.3.1",
-    "rimraf": "^2.4.3",
-    "watch": "^0.16.0"
+    "autoprefixer": "^6.3.6",
+    "chai": "^3.4.0",
+    "grunt": "^0.4.5",
+    "grunt-cli": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-connect": "^0.11.2",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-mkdir": "^1.0.0",
+    "grunt-mocha-phantomjs": "^2.0.0",
+    "grunt-postcss": "^0.8.0",
+    "grunt-replace": "*",
+    "grunt-sass": "^1.1.0",
+    "grunt-zip": "*",
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0"
   }
 }
