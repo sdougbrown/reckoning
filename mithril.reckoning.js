@@ -911,6 +911,7 @@
     this.key = attrs.key;
 
     this.vm = mapViewModel({
+      textDate: this.calendar.getDisplayDate(this.date),
       focus: false,
       tabindex: -1,
       inFocusClassName: '',
@@ -960,20 +961,22 @@
     },
 
     _view: function (ctrl) {
+      var vm = ctrl.vm;
+
       return m('td.rk-cal__day', {
         key: ctrl.key,
         role: 'gridcell',
         'aria-rowindex': ctrl.indexes.week + 1,
         'aria-colindex': ctrl.indexes.weekday + 1,
         className: ctrl.classNames(),
-        tabindex: ctrl.vm.tabindex(),
+        tabindex: vm.tabindex(),
         onblur: ctrl.onBlur.bind(ctrl),
         onfocus: ctrl.onFocus.bind(ctrl),
         onclick: function(e) { ctrl.onClick(e) },
         onkeydown: function(e) { ctrl.onKeydown(e) },
         config: ctrl.config.bind(ctrl)
       }, [
-        m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, this.calendar.getDisplayDate(ctrl.date)),
+        m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, vm.textDate()),
         ctrl.calendar.dayView(ctrl.date)
       ]);
     }

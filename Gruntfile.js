@@ -26,7 +26,7 @@ module.exports = function (grunt) {
         ].join("\n"),
         sourceMap: true
       },
-      reckoning: { src: "mithril-reckoning.js", dest: "mithril-reckoning.min.js" }
+      reckoning: { src: "mithril.reckoning.js", dest: "mithril.reckoning.min.js" }
     },
 
     mocha_phantomjs: {
@@ -40,7 +40,7 @@ module.exports = function (grunt) {
 
     watch: {
       reckoning: {
-        files: "mithril-reckoning.js",
+        files: "mithril.reckoning.js",
         tasks: ["copy:demoReckoning"],
         options: {
           debounceDelay: 250
