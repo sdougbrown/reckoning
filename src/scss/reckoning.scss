@@ -10,6 +10,8 @@ $screen-sm: 44em !default;
 $screen-md: 66em !default;
 $screen-lg: 88em !default;
 
+$calendar-size: default !default; // small / medium / large
+
 $rk-cal-position: relative !default;
 $rk-cal-bg: none !default;
 $rk-cal-color: inherit !default;
@@ -401,44 +403,50 @@ $rk-cal-controls-next-top: auto !default;
 }
 
 @media (min-width: $screen-sm) {
-  .rk-cal__month.is-1-of-2,
-  .rk-cal__month.is-2-of-2 {
-    display: inline-table;
-    width: 50%;
-  }
-
-  .rk-cal__month.is-1-of-4 {
-    &, & ~ .rk-cal__month {
+  @if $calendar-size == 'small' {
+    .rk-cal__month.is-1-of-2,
+    .rk-cal__month.is-2-of-2 {
       display: inline-table;
       width: 50%;
     }
-  }
 
-  .rk-cal__month.is-2-of-2 {
-    border-left: $rk-cal-multi-month-border;
+    .rk-cal__month.is-1-of-4 {
+      &, & ~ .rk-cal__month {
+        display: inline-table;
+        width: 50%;
+      }
+    }
+
+    .rk-cal__month.is-2-of-2 {
+      border-left: $rk-cal-multi-month-border;
+    }
   }
 }
 
 @media (min-width: $screen-md) {
-  .rk-cal__month.is-1-of-3 {
-    &, & ~ .rk-cal__month {
-      display: inline-table;
-      width: 33.3%;
-    }
-    & ~ .rk-cal__month {
-      border-left: $rk-cal-multi-month-border;
+  @if $calendar-size == 'small' {
+    .rk-cal__month.is-1-of-3 {
+      &, & ~ .rk-cal__month {
+        display: inline-table;
+        width: 33.3%;
+      }
+      & ~ .rk-cal__month {
+        border-left: $rk-cal-multi-month-border;
+      }
     }
   }
 }
 
 @media (min-width: $screen-lg) {
-  .rk-cal__month.is-1-of-4 {
-    &, & ~ .rk-cal__month {
-      display: inline-table;
-      width: 25%;
-    }
-    & ~ .rk-cal__month {
-      border-left: $rk-cal-multi-month-border;
+  @if $calendar-size == 'small' {
+    .rk-cal__month.is-1-of-4 {
+      &, & ~ .rk-cal__month {
+        display: inline-table;
+        width: 25%;
+      }
+      & ~ .rk-cal__month {
+        border-left: $rk-cal-multi-month-border;
+      }
     }
   }
 }
