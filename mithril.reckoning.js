@@ -679,6 +679,7 @@
     this.model.weekdays = m.prop(this.getWeekdayOrder());
     this.updateMonths(this.calendarMonths);
 
+    this.monthView = ops.monthView || null;
     this.dayView = ops.dayView || this._dayView;
     this.view = this._view.bind(this, this);
   };
@@ -794,7 +795,7 @@
       }, [
         (ctrl.calendarControls) ? ctrl.calendarControls() : '',
         ctrl.calendarMonths.map(function(monthView) {
-          return monthView();
+          return (ctrl.monthView) ? ctrl.monthView(ctrl, monthView) : monthView();
         })
       ]);
     },
@@ -977,7 +978,7 @@
         config: ctrl.config.bind(ctrl)
       }, [
         m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, vm.textDate()),
-        ctrl.calendar.dayView(ctrl.date)
+        ctrl.calendar.dayView(ctrl)
       ]);
     }
   };

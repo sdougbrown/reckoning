@@ -15,6 +15,7 @@
     "url": "http://github.com/sdougbrown/reckoning/issues"
   },
   "scripts": {
+    "demo": "grunt",
     "test": "grunt test"
   },
   "main": "mithril-reckoning.js",
