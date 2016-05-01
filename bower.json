@@ -1,7 +1,23 @@
 {
-  "name": "mithril-reckoning",
-  "version": "0.0.0",
-  "dependencies": {
-    "mithril": "git://github.com/lhorie/mithril.js.git"
-  }
+  "name": "reckoning",
+  "description": "Reckoning - A Legendary Javascript Calendar",
+  "main": "reckoning.js",
+  "authors": [
+    "Doug Brown"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "javascript",
+    "calendar",
+    "dates",
+    "mithril"
+  ],
+  "homepage": "reckoning.douggo.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }

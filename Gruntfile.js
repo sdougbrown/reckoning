@@ -40,7 +40,7 @@ module.exports = function (grunt) {
 
     watch: {
       reckoning: {
-        files: "mithril.reckoning.js",
+        files: ["reckoning.js", "mithril.reckoning.js"],
         tasks: ["copy:demoReckoning"],
         options: {
           debounceDelay: 250
@@ -106,13 +106,14 @@ module.exports = function (grunt) {
       },
 
       demoReckoning: {
-        src: "./mithril.reckoning.js",
+        expand: true,
+        src: ["./reckoning.js", "./mithril.reckoning.js"],
         dest: demoFolder + "/js/"
       },
 
       demoVendor: {
         expand: true,
-        cwd: "./bower_components/",
+        cwd: "./node_modules/",
         src: [ "./mithril/mithril.*" ],
         dest: demoFolder + "/vendor/"
       },
