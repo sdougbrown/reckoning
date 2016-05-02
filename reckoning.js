@@ -662,16 +662,16 @@
     this.today = m.prop(this.parent.parse(ops.today) || new Date());
     this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
-    this.vm = {
-      advanceBy: m.prop(1),
-      resetDate: m.prop(startDate || this.today()),
-      numberOfMonths: m.prop(ops.numberOfMonths),
-      startWeekOnDay: m.prop(ops.startWeekOnDay),
-      year: m.prop((!!startDate) ? startDate.getFullYear() : this.today().getFullYear()),
-      month: m.prop((!!startDate) ? startDate.getMonth() : ops.month)
-    };
+    this.vm = mapViewModel({
+      advanceBy: 1,
+      resetDate: startDate || this.today(),
+      numberOfMonths: ops.numberOfMonths,
+      startWeekOnDay: ops.startWeekOnDay,
+      weekdays: this.getWeekdayOrder(ops.startWeekOnDay),
+      year: (!!startDate) ? startDate.getFullYear() : this.today().getFullYear(),
+      month: (!!startDate) ? startDate.getMonth() : ops.month
+    });
 
-    this.model.weekdays = m.prop(this.getWeekdayOrder());
     this.updateMonths(this.calendarMonths);
 
     this.monthView = ops.monthView || null;
@@ -719,7 +719,6 @@
         monthyear = this.getModifiedDate(vm.month() + i, vm.year());
         date = new Date(monthyear.year, monthyear.month, 1);
         months[i] = new Month({
-          model: this.model,
           calendar: this,
           title: rk.format(date, { string: { month: rk.string.month, year: rk.string.year } }),
           ranges: rk.ranges,
@@ -744,9 +743,9 @@
       };
     },
 
-    getWeekdayOrder: function () {
+    getWeekdayOrder: function (startDay) {
       var days = this.model.days();
-      var startDay = this.vm.startWeekOnDay();
+      startDay = (isDefined(startDay)) ? startDay : this.vm.startWeekOnDay();
       return [].concat(
         days.slice(startDay),
         days.slice(0, startDay)
@@ -787,7 +786,6 @@
   };
 
   var Month = function (attrs) {
-    this.model = attrs.model;
     this.calendar = attrs.calendar;
     this.ranges = attrs.ranges;
     this.month = attrs.month;
