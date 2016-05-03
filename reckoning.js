@@ -218,15 +218,19 @@
     },
 
     locale: function (locale) {
+      var redraw = false;
       // set passed value
       // can un-set and go to default (null value only)
       if (!!locale || locale === null) {
         this._locale = locale;
+        redraw = true;
       }
       // fall back to default if unset
       if (!this._locale) {
         this._locale = this.defaults.locale;
       }
+      // could potentially update month/day lists as well
+      if (redraw && this.redraw) this.redraw(this, { event: 'locale' });
 
       return this._locale;
     },
@@ -714,7 +718,7 @@
       vm.month(newDate.month);
       vm.year(newDate.year);
       this.updateMonths(this.calendarMonths);
-      this.parent.redraw(this);
+      this.parent.redraw(this, { event: 'advance' });
     },
 
     previous: function () {
@@ -731,7 +735,7 @@
       vm.month(vm.resetDate().getMonth());
       vm.year(vm.resetDate().getFullYear());
       this.updateMonths(this.calendarMonths);
-      this.parent.redraw(this);
+      this.parent.redraw(this, { event: 'reset' });
     },
 
     updateMonths: function (months, total) {
@@ -783,7 +787,7 @@
       this.vm.weekdays(this.getWeekdayOrder(startDay));
       // refresh immediately
       this.updateMonths(this.calendarMonths);
-      this.parent.redraw(this);
+      this.parent.redraw(this, { event: 'order' });
     },
 
     onFocus: function () {

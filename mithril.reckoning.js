@@ -1,4 +1,4 @@
-(function (Constructor) {
+(function (factory) {
 
   // views in mithril-style templates
   var views = {
@@ -97,7 +97,6 @@
         ])
       ]);
     }
-
   };
 
   // actual DOM stuff
@@ -108,14 +107,14 @@
     }
   };
 
-  Constructor.prototype._view = views.main;
+  factory.prototype._view = views.main;
 
-  var Components = Constructor.prototype.components;
+  var components = factory.prototype.components;
 
-  Components.Calendar.prototype._view = views.calendar;
-  Components.Controls.prototype._view = views.controls;
-  Components.Month.prototype._view = views.month;
-  Components.Day.prototype._view = views.day;
-  Components.Day.prototype.config = configs.day;
+  components.Calendar.prototype._view = views.calendar;
+  components.Controls.prototype._view = views.controls;
+  components.Month.prototype._view = views.month;
+  components.Day.prototype._view = views.day;
+  components.Day.prototype.config = configs.day;
 
 })(Reckoning);
