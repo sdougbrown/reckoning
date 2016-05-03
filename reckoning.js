@@ -75,11 +75,32 @@
     return obj;
   };
 
+  // modified `m.prop` from mithril.
+  // drops the promise support, adds a
+  // callback option
+  function gettersetter(store, cb) {
+    function prop() {
+      if (arguments.length) {
+        cb = (arguments[1]) ? arguments[1] : cb;
+        store = arguments[0];
+        // fire callback if store changed
+        if (cb) cb(store);
+      }
+      return store
+    }
+
+    return prop
+  }
+
+  function proppy (store, cb) {
+    return gettersetter(store, cb)
+  }
+
   function mapViewModel (ops) {
     var map = {};
 
     for (var prop in ops) {
-      map[prop] = m.prop(ops[prop]);
+      map[prop] = proppy(ops[prop]);
     }
 
     return map;
@@ -123,8 +144,8 @@
     this.string = assign(this.defaults.string, attrs.string);
 
     this.model = {
-      days: (!!attrs.days) ? m.prop(attrs.days) : m.prop(this.mapDays()),
-      months: (!!attrs.months) ? m.prop(attrs.months) : m.prop(this.mapMonths())
+      days: (!!attrs.days) ? proppy(attrs.days) : proppy(this.mapDays()),
+      months: (!!attrs.months) ? proppy(attrs.months) : proppy(this.mapMonths())
     };
 
     if (attrs.calendar) {
@@ -135,6 +156,7 @@
     }
 
     this.view = this._view.bind(this, this);
+    this.redraw = this._redraw;
   };
 
   Reckoning.prototype = {
@@ -438,6 +460,7 @@
       return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
     },
 
+    _redraw: noop,
     _view: noop
   };
 
@@ -659,18 +682,19 @@
     this.calendarMonths = [];
     this.calendarControls = this._createControls(controls);
 
-    this.today = m.prop(this.parent.parse(ops.today) || new Date());
+    this.today = proppy(this.parent.parse(ops.today) || new Date());
     this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
     this.vm = mapViewModel({
       advanceBy: 1,
       resetDate: startDate || this.today(),
-      numberOfMonths: ops.numberOfMonths,
-      startWeekOnDay: ops.startWeekOnDay,
       weekdays: this.getWeekdayOrder(ops.startWeekOnDay),
       year: (!!startDate) ? startDate.getFullYear() : this.today().getFullYear(),
       month: (!!startDate) ? startDate.getMonth() : ops.month
     });
+    // vm props w/ callbacks
+    this.vm.numberOfMonths = proppy(ops.numberOfMonths, this.updateMonths.bind(this, this.calendarMonths));
+    this.vm.startWeekOnDay = proppy(ops.startWeekOnDay, this.setWeekdayOrder.bind(this));
 
     this.updateMonths(this.calendarMonths);
 
@@ -690,6 +714,7 @@
       vm.month(newDate.month);
       vm.year(newDate.year);
       this.updateMonths(this.calendarMonths);
+      this.parent.redraw(this);
     },
 
     previous: function () {
@@ -706,13 +731,14 @@
       vm.month(vm.resetDate().getMonth());
       vm.year(vm.resetDate().getFullYear());
       this.updateMonths(this.calendarMonths);
+      this.parent.redraw(this);
     },
 
-    updateMonths: function (months) {
+    updateMonths: function (months, total) {
       months = months || this.calendarMonths;
       var vm = this.vm;
       var rk = this.parent;
-      var total = vm.numberOfMonths();
+      total = total || vm.numberOfMonths();
       // this should check the month value (>0, <12)
       // and set the month/year index accordingly
       for (var i = 0, monthyear, date; i < total; i++) {
@@ -750,6 +776,14 @@
         days.slice(startDay),
         days.slice(0, startDay)
       );
+    },
+
+    setWeekdayOrder: function (startDay) {
+      // set to vm
+      this.vm.weekdays(this.getWeekdayOrder(startDay));
+      // refresh immediately
+      this.updateMonths(this.calendarMonths);
+      this.parent.redraw(this);
     },
 
     onFocus: function () {
@@ -795,8 +829,8 @@
     var days = [];
 
     this.vm = {
-      title: m.prop(attrs.title),
-      className: m.prop('is-'+attrs.counter+'-of-'+attrs.total),
+      title: proppy(attrs.title),
+      className: proppy('is-'+attrs.counter+'-of-'+attrs.total),
       // object refs rather than props
       weeks: this.mapWeeks({ dates: dates, days: days }),
       dates: dates,
@@ -925,9 +959,9 @@
         this.views[prop] = setting;
       }
       if (isString(setting)) {
-        this.views[prop] = m.prop(setting);
+        this.views[prop] = proppy(setting);
       }
-      this.vm[prop] = m.prop(!!setting);
+      this.vm[prop] = proppy(!!setting);
     }
     this.view = this._view.bind(this, this);
   };
