@@ -89,6 +89,10 @@
       return store
     }
 
+    prop.toJSON = function () {
+      return store
+    }
+
     return prop
   }
 
