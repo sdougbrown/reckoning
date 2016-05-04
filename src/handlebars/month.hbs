@@ -1,0 +1,25 @@
+<table class="rk-cal__month {{vm.className.toJSON}}" role="grid">
+  <thead class="rk-cal__head" role="rowgroup">
+    <tr class="rk-cal__head__row rk-cal__head__row--month">
+      <th class="rk-cal__head__month" colspan="7">
+        {{ vm.title.toJSON }}
+      </th>
+    </tr>
+    <tr class="rk-cal__head__row rk-cal__head__row--weekday">
+      {{#each weekdays.toJson }}
+        <th class="rk-cal__head__weekday">
+          <span role="columnheader">{{this}}</span>
+        </th>
+      {{/each}}
+    </tr>
+  </thead>
+  <tbody class="rk-cal__body" role="rowgroup">
+    {{#each weeks}}
+      <tr class="rk-cal__body__row" role="row">
+        {{#each this}}
+          {{{ this.view }}}
+        {{/each}}
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

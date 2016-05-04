@@ -152,6 +152,21 @@ module.exports = function (grunt) {
           src: demoFolder + "/css/*.css"
         }
       }
+    },
+
+    handlebars: {
+      demo: {
+        options: {
+          namespace: 'Reckoning.templates',
+          processName: function(filePath) {
+            var name = filePath.replace(/\.\/src\/handlebars\/(\w+)(\.hbs)/, '$1');
+            return name;
+          }
+        },
+        files: {
+          'demo/js/handlebars.reckoning.templates.js': [ srcFolder + '/handlebars/*.hbs' ]
+        }
+      }
     }
   });
 
@@ -161,6 +176,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-connect");
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-sass");
+  grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks("grunt-postcss");
   grunt.loadNpmTasks("grunt-mkdir");
   grunt.loadNpmTasks("grunt-mocha-phantomjs");
