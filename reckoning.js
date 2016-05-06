@@ -1,18 +1,14 @@
 (function (global, factory) {
 
   var Reckoning = factory(global);
-  var rk = new Reckoning({ string: { weekday: 'long' } });
 
   // bind to the global scope without polyfills
   if (typeof module === "object" && module != null && module.exports) {
     module.exports = Reckoning;
-    module.exports = rk;
   } else if (typeof define === "function" && define.amd) {
     define(function () { return Reckoning; });
-    define(function () { return rk; });
   } else {
     global.Reckoning = Reckoning;
-    global.rk = rk;
   }
 
 })(typeof window !== "undefined" ? window : {}, function (global) {
@@ -86,14 +82,14 @@
         // fire callback if store changed
         if (cb) cb(store);
       }
-      return store
+      return store;
     }
 
     prop.toJSON = function () {
-      return store
+      return store;
     }
 
-    return prop
+    return prop;
   }
 
   function proppy (store, cb) {
@@ -133,7 +129,7 @@
 
   // Reckoning core
   var Reckoning = function (attrs) {
-    if (!this) return;
+    if (!this) return { months: MONTHS, days: DAYS, now: Date() };
 
     attrs = attrs || {};
 
@@ -170,6 +166,24 @@
 
     toString: function () {
       return '[object Reckoning]';
+    },
+
+    toJSON: function () {
+      var json = {
+        calendar: (this.calendar) ? this.calendar.toJSON() : null,
+        timeline: (this.timeline) ? this.timeline.toJSON() : null,
+        months: (this.model) ? this.model.months.toJSON() : MONTHS,
+        days: (this.model) ? this.model.days.toJSON() : DAYS,
+        string: (this.string) ? this.string : null,
+        locale: this.locale(),
+        ranges: {}
+      };
+
+      for (var range in this.ranges) {
+        json.ranges[range] = this.ranges[range].toJSON();
+      }
+
+      return json;
     },
 
     defaults: {
@@ -231,7 +245,7 @@
       }
       // fall back to default if unset
       if (!this._locale) {
-        this._locale = this.defaults.locale;
+        this._locale = (this.defaults) ? this.defaults.locale : getLocale();
       }
       // could potentially update month/day lists as well
       if (redraw && this.redraw) this.redraw(this, { event: 'locale' });
@@ -275,7 +289,7 @@
       if (!date) return null;
       if (this._format) return this._format(date);
 
-      var string = ops.string || this.string || this.defaults.string;
+      var string = ops.string || this.string || this.prototype.defaults.string;
 
       // use the built-in browser behaviour if we can
       if (canUseLocales) {
@@ -472,6 +486,13 @@
     _view: noop
   };
 
+  // map for use without a constructor
+  Reckoning.mapRange = Reckoning.prototype.mapRange;
+  Reckoning.between = Reckoning.prototype.between;
+  Reckoning.locale = Reckoning.prototype.locale;
+  Reckoning.format = Reckoning.prototype.format;
+  Reckoning.parse = Reckoning.prototype.parse;
+
 
   // child constructors
   var DateRange = function (rk, range, ops) {
@@ -488,9 +509,9 @@
 
     // create fintie maps
     this.byDate = (range.fixedBetween) ? this._getMapBetween(range.fromDate, range.toDate) : {};
-    this.byMonth = this._getMapByRepeat(range.everyMonth, 'month');
-    this.byWeekday = this._getMapByRepeat(range.everyWeekday, 'weekday');
-    this.byDay = this._getMapByRepeat(range.everyDate);
+    this.byMonth = range.byMonth || this._getMapByRepeat(range.everyMonth, 'month');
+    this.byWeekday = range.byWeekday || this._getMapByRepeat(range.everyWeekday, 'weekday');
+    this.byDay = range.byDay || this._getMapByRepeat(range.everyDate);
 
     // add to dates map
     if (range.dates) {
@@ -498,7 +519,6 @@
 
       for (var i in dates) this.addDate(dates[i]);
     }
-
   };
 
   DateRange.prototype = {
@@ -506,6 +526,26 @@
 
     toString: function () {
       return '[object DateRange]';
+    },
+
+    toJSON: function () {
+      var json = {
+        dates: [],
+        name: this.name,
+        toDate: (this._toDate) ? this._toDate.toJSON() : null,
+        fromDate: (this._fromDate) ? this._fromDate.toJSON() : null,
+        byWeekday: this.byWeekday,
+        byMonth: this.byMonth,
+        byDay: this.byDay
+      };
+
+      for (var date in this.byDate) {
+        if (!!this.byDate[date]) {
+          json.dates.push(date);
+        }
+      }
+
+      return json;
     },
 
     setDate: function (date, value) {
@@ -641,7 +681,7 @@
 
       for (var i in everyValue) {
         key = this._getNumericalKey(everyValue[i], type);
-        map[key] = true;
+        if (!!key) map[key] = true;
       }
 
       return map;
@@ -713,6 +753,17 @@
 
   Calendar.prototype = {
     constructor: Calendar,
+
+    toJSON: function () {
+      var vm = this.vm;
+
+      return {
+        today: this.today().toJSON(),
+        startWeekOnDay: vm.startWeekOnDay.toJSON(),
+        numberOfMonths: vm.numberOfMonths.toJSON(),
+        startDate: vm.year.toJSON() + '-' + vm.month.toJSON() + '-1'
+      };
+    },
 
     advance: function (amount) {
       if (!isDefined(amount) || !parseInt(amount)) return false;
