@@ -358,6 +358,12 @@
       }
     },
 
+    getDateKey: function (date) {
+      date = this.parse(date);
+      if (!date) return null;
+
+      return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    },
 
 
     mapMonths: function (ops) {
@@ -475,18 +481,14 @@
       return map;
     },
 
-    _getDateKey: function (date) {
-      date = this.parse(date);
-      if (!date) return null;
-
-      return '' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-    },
-
     _redraw: noop,
     _view: noop
   };
 
   // map for use without a constructor
+  Reckoning.getDateKey = Reckoning.prototype.getDateKey;
+  Reckoning.getMonth = Reckoning.prototype.getMonth;
+  Reckoning.getDay = Reckoning.prototype.getDay;
   Reckoning.mapRange = Reckoning.prototype.mapRange;
   Reckoning.between = Reckoning.prototype.between;
   Reckoning.locale = Reckoning.prototype.locale;
@@ -554,7 +556,8 @@
       if (!date) return;
 
       // assigns value, or toggles if no value
-      this.byDate[rk._getDateKey(date)] = (value) ? value : !this.byDate[rk._getDateKey(date)];
+      var key = rk.getDateKey(date);
+      this.byDate[key] = (value) ? value : !this.byDate[key];
     },
 
     addDate: function (date) {
@@ -577,7 +580,7 @@
       date = rk.parse(date);
       if (!date) return false;
 
-      var isMatch = !!this.byDate[rk._getDateKey(date)];
+      var isMatch = !!this.byDate[rk.getDateKey(date)];
       if (isMatch) return isMatch;
 
       if (this._toDate || this._fromDate) {
@@ -652,17 +655,18 @@
     },
 
     _getMapBetween: function (from, to) {
-      from = this.parent.parse(from);
-      to = this.parent.parse(to);
+      var rk = this.parent;
+      from = rk.parse(from);
+      to = rk.parse(to);
       if (!from || !to) return {};
       // flip the order if the dates were transposed
       var date = (to > from) ? new Date(from) : new Date(to);
-      var difference = this.parent.between(from, to);
+      var difference = rk.between(from, to);
       var days = 0;
       var map = {};
 
       for (;days <= difference; days++) {
-        map[this.parent._getDateKey(date)] = true;
+        map[rk.getDateKey(date)] = true;
         date.setTime(date.getTime() + DAY_IN_MS);
       }
 
@@ -901,6 +905,7 @@
 
   Month.prototype = {
     mapWeeks: function (ops) {
+      var rk = this.calendar.parent;
       var dayMap = ops.days;
       var dateMap = ops.dates;
       var weeks = [[],[],[],[],[]];
@@ -911,7 +916,7 @@
       startDate.setDate(startDate.getDate() - (startDate.getDay() - this.calendar.vm.startWeekOnDay()));
       // normal monthly calendar grid is 7 x 5 - maybe adapt for non-standard calendars?
       for (var i = 0, week = 0, day = 0; i < 35; i++) {
-        var dateKey = this.calendar.parent._getDateKey(startDate);
+        var dateKey = rk.getDateKey(startDate);
         weeks[week][day] = new Day({
           calendar: this.calendar,
           ranges: this.ranges,

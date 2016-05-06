@@ -2,8 +2,6 @@
 
 A Legendary Javascript Calendar Framework
 
-Full Documentation Forthcoming
-
 Check out the [demo page](http://reckoning.douggo.com) for the current feature-set
 
 ---
@@ -92,25 +90,15 @@ Reckoning currently accepts the following options, with defaults pre-defined for
 {
   locale: [String | Array<String>],
 
-  range: {
-    id: [String],
-    name: String,
-    dates: [String<YYYYMMDD> | Array<String<YYYYMMDD>>],
-    toDate: [String<YYYYMMDD> | Date],
-    fromDate: [String<YYYYMMDD> | Date],
-    fixedBetween: [Boolean],
-    everyDate: [Number | Array<Number>],
-    everyWeekday: [String | Number | Array<String | Number>],
-    everyMonth: [String | Number | Array<String | Number>]
-  },
+  ranges: [Array<DateRange> | Object<DateRange>], // discussed below
 
   calendar: {
     controls: [Boolean]
-    today: [String<YYYYMMDD> | Date],
+    today: [String<YYYY-MM-DD> | Date],
     dayView: [Function],
     numberOfMonths: [Number],
     startWeekOnDay: [Number],
-    startDate: [String<YYYYMMDD> | Date],
+    startDate: [String<YYYY-MM-DD> | Date],
     year: [Number],
     month: [Number],
     onDayClick: [Function]
@@ -130,6 +118,30 @@ Reckoning currently accepts the following options, with defaults pre-defined for
   }
 }
 ```
+
+#### Date Range Profile
+
+```javascript
+{
+  name: String,
+  id: [String],
+  dates: [String<YYYY-MM-DD> | Array<String<YYYYMMDD>>],
+  toDate: [String<YYYY-MM-DD> | Date],
+  fromDate: [String<YYYY-MM-DD> | Date],
+  fixedBetween: [Boolean],
+  everyDate: [Number | Array<Number>],
+  everyWeekday: [String | Number | Array<String | Number>],
+  everyMonth: [String | Number | Array<String | Number>]
+}
+```
+
+`DateRange`s can be mapped when initializing a `Reckoning` instance, or afterwards using `Reckoning.mapRange`.  The `id` parameter is used in order for multiple ranges to share the same `name` for styling or other purposes, and can be randomly generated if you desire.
+
+The `name` parameter is the only required property, and it's not *really* required.  When intializing a `Reckoning` with the `ranges` object, the name is automatically assigned by the `DateRange`'s key if no `name` value is provided. (In this case, the key is transformed from `camelCase` to `kebab-case` since the name is used for css styles).  If initializing with an array, or via `mapRange`, a name is required.
+
+
+##### More to come!
+
 More features are planned (and some already have defined defaults).  When they are fully functional the profile above will be updated.
 
 ### Using Reckoning as a Utility
@@ -138,11 +150,14 @@ Maybe you don't want to generate an entire calendar and you just want to map a r
 
 ##### Available non-instance methods:
 ```javascript
-Reckoning.mapRange
-Reckoning.between
-Reckoning.locale
-Reckoning.format
-Reckoning.parse
+Reckoning.getDateKey(String<YYYY-MM-DD> | Date)
+Reckoning.getMonth(String<YYYY-MM-DD> | Date)
+Reckoning.getDay(String<YYYY-MM-DD> | Date)
+Reckoning.mapRange(<DateRange>)
+Reckoning.between(String<YYYY-MM-DD> | Date from, String<YYYY-MM-DD> | Date to)
+Reckoning.locale(String | Array<String>)
+Reckoning.format(String<YYYY-MM-DD> | Date)
+Reckoning.parse(String<YYYY-MM-DD> | Date)
 ```
 
 ##### e.g.
