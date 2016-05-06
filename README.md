@@ -84,11 +84,21 @@ todayCal.ranges.today.inRange(tomorrow);
 // false
 ```
 
-Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Check out the global `rk` helper for utilities like that.  (It's just an empty Reckoning instantiation).
+Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Use `Reckoning` methods directly.
 
+##### Available non-instance methods:
+```javascript
+Reckoning.mapRange
+Reckoning.between
+Reckoning.locale
+Reckoning.format
+Reckoning.parse
+```
+
+##### e.g.
 ```javascript
 // explictly map today, tomorrow, and every weekend
-var partyTime = rk.mapRange({ dates: [today, tomrorow], everyWeekday: [0,6] });
+var partyTime = Reckoning.mapRange({ dates: [today, tomrorow], everyWeekday: [0,6] });
 partyTime.inRange(today);
 // true - time to party
 ```
