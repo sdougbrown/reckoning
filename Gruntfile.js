@@ -26,7 +26,7 @@ module.exports = function (grunt) {
         ].join("\n"),
         sourceMap: true
       },
-      reckoning: { src: "mithril.reckoning.js", dest: "mithril.reckoning.min.js" }
+      reckoning: { src: "reckoning.js", dest: "reckoning.min.js" }
     },
 
     mocha_phantomjs: {
@@ -40,7 +40,7 @@ module.exports = function (grunt) {
 
     watch: {
       reckoning: {
-        files: ["reckoning.js", "mithril.reckoning.js", "vanilla.reckoning.js"],
+        files: ["reckoning.js", "mithril.reckoning.js", "vanilla.reckoning.js", "react.reckoning.js"],
         tasks: ["copy:demoReckoning"],
         options: {
           debounceDelay: 250
@@ -107,14 +107,18 @@ module.exports = function (grunt) {
 
       demoReckoning: {
         expand: true,
-        src: ["./reckoning.js", "./mithril.reckoning.js", "./vanilla.reckoning.js"],
+        src: ["./reckoning.js", "./mithril.reckoning.js", "./vanilla.reckoning.js", "./react.reckoning.js"],
         dest: demoFolder + "/js/"
       },
 
       demoVendor: {
         expand: true,
         cwd: "./node_modules/",
-        src: [ "./mithril/mithril.*" ],
+        src: [
+          "./mithril/mithril.*",
+          "./react/dist/react.js",
+          "./react-dom/dist/react-dom.js"
+        ],
         dest: demoFolder + "/vendor/"
       },
 

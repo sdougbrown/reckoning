@@ -887,6 +887,7 @@
     this.ranges = attrs.ranges;
     this.month = attrs.month;
     this.year = attrs.year;
+    this.key = attrs.year + '-' + attrs.month;
 
     var dates = {};
     var days = [];
@@ -1032,14 +1033,17 @@
 
   Controls.prototype = {
     onClick: {
-      next: function () {
+      next: function (cb) {
         this.calendar.next();
+        if (cb) cb();
       },
-      previous: function () {
+      previous: function (cb) {
         this.calendar.previous();
+        if (cb) cb();
       },
-      reset: function () {
+      reset: function (cb) {
         this.calendar.reset();
+        if (cb) cb();
       }
     },
 

@@ -23,7 +23,11 @@
       var vm = ctrl.vm;
       var calVM = ctrl.calendar.vm;
 
-      return m('table.rk-cal__month', { className: vm.className(), role: 'grid' }, [
+      return m('table.rk-cal__month', {
+        className: vm.className(),
+        role: 'grid',
+        key: ctrl.key
+      }, [
         m('thead.rk-cal__head', { role: 'rowgroup' }, [
           m('tr.rk-cal__head__row', {
             role: 'row',

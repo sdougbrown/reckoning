@@ -18,7 +18,7 @@
     "demo": "grunt",
     "test": "grunt test"
   },
-  "main": "mithril-reckoning.js",
+  "main": "reckoning.js",
   "devDependencies": {
     "autoprefixer": "^6.3.6",
     "chai": "^3.4.0",
@@ -40,6 +40,7 @@
     "handlebars": "^4.0.5",
     "mithril": "^0.2.4",
     "mocha": "^2.3.3",
+    "react": "^15.0.2",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   }
