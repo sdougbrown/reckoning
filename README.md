@@ -12,7 +12,7 @@ Check out the [demo page](http://reckoning.douggo.com) for the current feature-s
 
 Reckoning is a data-driven time visualization library.  That's a very fancy way of saying a 'calendar'.
 
-Reckoning is currently built in [Mithril](http://mithril.js.org), which is a nice small framework that handles rendering the views and some other great stuff.
+Reckoning is currently built in native JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org), which is a nice small framework that handles smart on-the-fly re-rendering.
 
 ### What's the point?
 
@@ -84,6 +84,56 @@ todayCal.ranges.today.inRange(tomorrow);
 // false
 ```
 
+### Constructor Profile
+
+Reckoning currently accepts the following options, with defaults pre-defined for each (see `Reckoning.prototype.defaults`).
+
+```javascript
+{
+  locale: [String | Array<String>],
+
+  range: {
+    id: [String],
+    name: String,
+    dates: [String<YYYYMMDD> | Array<String<YYYYMMDD>>],
+    toDate: [String<YYYYMMDD> | Date],
+    fromDate: [String<YYYYMMDD> | Date],
+    fixedBetween: [Boolean],
+    everyDate: [Number | Array<Number>],
+    everyWeekday: [String | Number | Array<String | Number>],
+    everyMonth: [String | Number | Array<String | Number>]
+  },
+
+  calendar: {
+    controls: [Boolean]
+    today: [String<YYYYMMDD> | Date],
+    dayView: [Function],
+    numberOfMonths: [Number],
+    startWeekOnDay: [Number],
+    startDate: [String<YYYYMMDD> | Date],
+    year: [Number],
+    month: [Number],
+    onDayClick: [Function]
+  },
+
+  string: {
+    weekday: [String], // narrow/short/long
+    month: [String], // narrow/short/long
+    year: [String], // numeric/2-digit
+    day: [String] // numeric/2-digit
+  },
+
+  controls: {
+    previous: [Boolean | String | Function],
+    reset: [Boolean | String | Function],
+    next: [Boolean | String | Function]
+  }
+}
+```
+More features are planned (and some already have defined defaults).  When they are fully functional the profile above will be updated.
+
+### Using Reckoning as a Utility
+
 Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Use `Reckoning` methods directly.
 
 ##### Available non-instance methods:
@@ -146,9 +196,8 @@ m.mount(document.body, {
 
 ### Roadmap
 
- - Timeline Visuals
  - Test Suite
- - Nicer Build Script
+ - Timeline Visuals
  - Second Sample Theme
  - Alternate Implementations - React? Riot?
 
