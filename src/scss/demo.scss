@@ -3,15 +3,26 @@ $screen-sm: 44em;
 $screen-md: 66em;
 $screen-lg: 88em;
 
+$red: #cc241d;
+$green: #689d6a;
+
 $demo-bg: #f7f7f7;
+$demo-color: #444;
 $demo-padding: 20px;
 $demo-border-color: #c2c2c2;
 $demo-sub-color: #969696;
 
-$demo-today-bg: #cc241d;
+$demo-header-bg: $demo-color;
+$demo-header-color: $demo-bg;
+$demo-header-height: ($demo-padding * 3);
+
+$demo-nav-color: $demo-header-color;
+$demo-nav-active-color: $red;
+
+$demo-today-bg: $red;
 $demo-today-color: #fff;
 
-$demo-selected-bg: #689d6a;
+$demo-selected-bg: $green;
 $demo-selected-color: $demo-bg;
 
 @import 'theme-base/small';
@@ -19,23 +30,105 @@ $demo-selected-color: $demo-bg;
 body {
   font-family: sans-serif;
   font-size: 100%;
+  color: $demo-color;
+  margin: $demo-padding;
+}
+
+.page-header {
+  background: $demo-header-bg;
+  color: $demo-header-color;
+
+  padding: 0;
+  margin-bottom: $demo-padding;
+  line-height: $demo-header-height;
+
+  text-align: center;
+
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+.page-header__title {
+  font-weight: bold;
+  font-size: 1.15em;
+}
+
+.nav,
+.nav__item {
+  display: block;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav__link {
+  display: block;
+  color: $demo-nav-color;
+  text-decoration: none;
+  font-size: 0.9em;
+
+  .is-active & {
+    background-color: $demo-nav-active-color;
+  }
+}
+
+@media (min-width: $screen-sm) {
+  .page-header {
+    text-align: left;
+    padding: 0 $demo-padding;
+  }
+
+  .page-header__title {
+    width: ($screen-sm / 4);
+    float: left;
+  }
+
+  .page-header__nav {
+    display: block;
+    overflow: hidden;
+  }
+
+  .nav {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .nav__item {
+    display: inline-block;
+  }
+
+  .nav__link {
+    padding: 0 $demo-padding;
+  }
 }
 
 // quick-n-dirty demo styles
+.content-demo-wrap,
 .calendar-demo-wrap {
   margin: $demo-padding auto;
   padding: 1px ($demo-padding);
   background: $demo-bg;
-  color: #444;
+  color: $demo-color;
   border: 1px solid $demo-border-color;
 
-  text-align: center;
 
   &:after {
     content: "";
     clear: both;
     display: table;
   }
+}
+
+.calendar-demo-wrap {
+  text-align: center;
+}
+
+.content-demo {
+  max-width: $screen-sm;
+  padding: 0 ($demo-padding / 2);
 }
 
 .demo-title {

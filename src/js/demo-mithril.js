@@ -133,8 +133,7 @@
   };
 
   demo.view = function (ctrl) {
-    return m('.calendar-demo-wrap', [
-      m('h1.demo-title', 'Reckoning Calendar Examples'),
+    return m('div', [
       m('.grid-cal', [
         m('h4', 'Basic Calendar View'),
         ctrl.basicCal.calendar.view(),
@@ -176,6 +175,6 @@
     ]);
   };
 
-  m.mount(document.body, demo);
+  m.mount(document.getElementById('demo'), demo);
 
 })(this);

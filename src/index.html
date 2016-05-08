@@ -3,16 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Mithril Reckoning Demo</title>
+  <title>Reckoning - A Legendary Javascript Calendar</title>
   <meta name="description" content="">
   <meta name="viewport" content="user-scalable=no, initial-scale=1, width=device-width">
   <meta name="author" content="@sdougbrown">
   <link rel="stylesheet" media="all" href="/css/demo.css">
 </head>
 <body>
+  <header class="page-header">
+    <div class="page-header__title">Reckoning.js</div>
+    <nav class="page-header__nav">
+      <ul class="nav" role="navigation">
+        <li class="nav__item is-active"><a class="nav__link" href="/">Core</a></li>
+        <li class="nav__item"><a class="nav__link" href="/mithril.html">Mithril</a></li>
+        <li class="nav__item"><a class="nav__link" href="/react.html">React</a></li>
+        <li class="nav__item"><a class="nav__link" href="/vanilla.html">Vanilla</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="content-demo-wrap">
+    <h1 class="demo-title">Reckoning.js</h1>
+    <main class="content-demo">
+      <h3>A Legendary Javascript Calendar</h3>
+      <h6>Reckoning is a data-driven time visualization library.</h6>
+      <p>Reckoning can act as a utility to help you compute ranges of time, as a parser to interpret strings, as a formatter to display date information, and as a fully-featured library to display interactive calendars.</p>
+      <p>The core Reckoning file is dependency-free 'vanilla' javascript, without any views.</p>
+      <p>Views can be rendered in a variety of ways, currently availbale in <a href="/mithril.html">Mithril</a>, <a href="/react.html">React</a>, and <a href="/vanilla.html">Vanilla JS</a>.</p>
+      <p>Check out the full README <a href="https://github.com/sdougbrown/reckoning">on github</a>.</p>
+    </main>
+  </div>
 </body>
-<script type="text/javascript" src="/vendor/mithril/mithril.min.js"></script>
-<script type="text/javascript" src="/js/reckoning.js"></script>
-<script type="text/javascript" src="/js/mithril.reckoning.js"></script>
-<script type="text/javascript" src="/js/demo-mithril.js"></script>
 </html>
