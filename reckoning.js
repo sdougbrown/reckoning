@@ -149,10 +149,10 @@
     };
 
     if (attrs.calendar) {
-      this.calendar = new Calendar(this, assign(this.defaults.calendar, attrs.calendar));
+      this.calendar = this.createCalendar(attrs.calendar);
     }
     if (attrs.timeline) {
-      this.timeline = new Timeline(this, assign(this.defaults.timeline, attrs.timeline));
+      this.timeline = this.createTimeline(attrs.timeline);
     }
 
     this.view = this._view.bind(this, this);
@@ -334,7 +334,16 @@
       return Math.round(Math.abs(diff) / DAY_IN_MS);
     },
 
+    // creating things
+    createCalendar: function (calendarOps) {
+      return new Calendar(this, assign(this.defaults.calendar, calendarOps));
+    },
 
+    createTimeline: function (timelineOps) {
+      return new Timeline(this, assign(this.defaults.timeline, timelineOps));
+    },
+
+    // getting things
     getMonth: function (date) {
       date = this.parse(date);
       if (!date) return null;
@@ -729,7 +738,6 @@
     this._onDayClick = ops.onDayClick;
     this._onDayKeydown = ops.onDayKeydown;
 
-    var startDate = this.parent.parse(ops.startDate);
     var controls = (ops.controls) ? assign(this.parent.defaults.controls, ops.controls) : null;
 
     this.calendarMonths = [];
@@ -738,12 +746,14 @@
     this.today = proppy(this.parent.parse(ops.today) || new Date());
     this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
+    var startDate = this._getStartDate(ops);
+
     this.vm = mapViewModel({
       advanceBy: 1,
-      resetDate: startDate || this.today(),
+      resetDate: startDate,
       weekdays: this.getWeekdayOrder(ops.startWeekOnDay),
-      year: (!!startDate) ? startDate.getFullYear() : this.today().getFullYear(),
-      month: (!!startDate) ? startDate.getMonth() : ops.month
+      year: startDate.getFullYear(),
+      month: startDate.getMonth()
     });
     // vm props w/ callbacks
     this.vm.numberOfMonths = proppy(ops.numberOfMonths, this.updateMonths.bind(this, this.calendarMonths));
@@ -860,6 +870,14 @@
 
     onDayKeydown: function (e, date, indexes) {
       if (this._onDayKeydown) this._onDayKeydown(e, this.parent, date, indexes);
+    },
+
+    _getStartDate: function (ops) {
+      var startDate = this.parent.parse(ops.startDate);
+      if (!startDate) {
+        startDate = (ops.year && ops.month) ? new Date(ops.year, ops.month) : this.today();
+      }
+      return startDate;
     },
 
     _getSimpleDisplayDate: function (date) {

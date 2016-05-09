@@ -1,4 +1,4 @@
-(function (factory) {
+(function (Reckoning) {
 
   var d = document;
   // simple 'vanilla template'
@@ -22,14 +22,14 @@
   // views in vanilla templates
   var views = {
     main: function (ctrl) {
-      var rkDiv = vt('div', { class: 'rk' });
+      var rkDiv = vt('div', { 'class': 'rk' });
       if (ctrl.timeline) rkDiv.appendChild(ctrl.timeline.view());
       if (ctrl.calendar) rkDiv.appendChild(ctrl.calendar.view());
       return rkDiv;
     },
     calendar: function (ctrl) {
       var cal = vt('div', {
-        class: 'rk-cal',
+        'class': 'rk-cal',
         tabindex: '0'
       });
       cal.onfocus = ctrl.onFocus.bind(ctrl);
@@ -48,35 +48,35 @@
       var calVM = ctrl.calendar.vm;
 
       var table = vt('table', {
-        class: 'rk-cal__month ' + vm.className(),
+        'class': 'rk-cal__month ' + vm.className(),
         role: 'grid'
       });
 
       var thead = vt('thead', {
-        class: 'rk-cal__head',
+        'class': 'rk-cal__head',
         role: 'rowgroup'
       }, table);
 
       var monthRow = vt('tr', {
         role: 'row',
-        class: 'rk-cal__head__row rk-cal__head__row--month'
+        'class': 'rk-cal__head__row rk-cal__head__row--month'
       }, thead);
 
       var monthCell = vt('th', {
-        class: 'rk-cal__head__month',
+        'class': 'rk-cal__head__month',
         colspan: 7
       }, monthRow);
       var monthTitle = vx(vm.title(), monthCell);
 
       var weekdayRow = vt('tr', {
-        class: 'rk-cal__head__row',
+        'class': 'rk-cal__head__row',
         role: 'row',
-        class: 'rk-cal__head__row--weekday'
+        'class': 'rk-cal__head__row--weekday'
       }, thead);
 
       calVM.weekdays().forEach(function(day) {
         var weekdayCell = vt('th', {
-         class: 'rk-cal__head__weekday'
+         'class': 'rk-cal__head__weekday'
         }, weekdayRow);
         var weekdaySpan = vt('span', {
           role: 'columnheader'
@@ -85,13 +85,13 @@
       });
 
       var tbody = vt('tbody', {
-        class: 'rk-cal__body',
+        'class': 'rk-cal__body',
         role: 'rowgroup'
       }, table);
 
       vm.weeks.forEach(function(week) {
         var weekRow = vt('tr', {
-          class: 'rk-cal__body__row',
+          'class': 'rk-cal__body__row',
           role: 'row'
         });
         week.forEach(function(day) {
@@ -108,7 +108,7 @@
       var calendar = ctrl.calendar;
 
       var dayCell = vt('td', {
-        class: 'rk-cal__day ' + ctrl.classNames(),
+        'class': 'rk-cal__day ' + ctrl.classNames(),
         key: ctrl.key,
         role: 'gridcell',
         'aria-rowindex': indexes.week + 1,
@@ -122,7 +122,7 @@
       dayCell.onkeydown = function(e) { ctrl.onKeydown(e) };
 
       var dayNum = vt('span', {
-        class: 'rk-cal__day__num',
+        'class': 'rk-cal__day__num',
         'aria-label': ctrl.date
       }, dayCell);
 
@@ -142,7 +142,7 @@
         var onClick = ctrl.onClick[name] || noop;
 
         var button = vt('button', {
-          class: 'rk-cal__controls__'+name,
+          'class': 'rk-cal__controls__'+name,
           'aria-label': name
         });
 
@@ -154,11 +154,11 @@
       };
 
       var controls = vt('div', {
-        class: 'rk-cal__controls'
+        'class': 'rk-cal__controls'
       });
 
       var controlsWrap = vt('div', {
-        class: 'rk-cal__controls__wrap'
+        'class': 'rk-cal__controls__wrap'
       }, controls);
 
       var prev = getView('previous');
@@ -174,9 +174,9 @@
     }
   };
 
-  factory.prototype._view = views.main;
+  Reckoning.prototype._view = views.main;
 
-  var components = factory.prototype.components;
+  var components = Reckoning.prototype.components;
 
   components.Calendar.prototype._view = views.calendar;
   components.Controls.prototype._view = views.controls;

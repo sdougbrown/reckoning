@@ -1,4 +1,4 @@
-(function (factory) {
+(function (Reckoning) {
 
   // views in mithril-style templates
   var views = {
@@ -111,9 +111,9 @@
     }
   };
 
-  factory.prototype._view = views.main;
+  Reckoning.prototype._view = views.main;
 
-  var components = factory.prototype.components;
+  var components = Reckoning.prototype.components;
 
   components.Calendar.prototype._view = views.calendar;
   components.Controls.prototype._view = views.controls;

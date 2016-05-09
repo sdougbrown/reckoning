@@ -1,10 +1,10 @@
-(function (factory, r) {
+(function (Reckoning, React) {
 
-  factory.react = factory.react || {};
+  Reckoning.react = Reckoning.react || {};
 
-  var rc = r.createElement;
+  var rc = React.createElement;
 
-  var Calendar = factory.react.Calendar = React.createClass({
+  var Calendar = Reckoning.react.Calendar = React.createClass({
     getInitialState: function () {
       var vm = this.props.calendar.vm;
 

@@ -27,7 +27,31 @@ A lot of calendar libraries are either document-driven (i.e. a jQuery plugin) or
  - Accessiblity by default
  - Localization by default
 
-### Using Reckoning
+### Using Reckoning as a Utility
+
+Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Use `Reckoning` methods directly.
+
+##### Available non-instance methods:
+```javascript
+Reckoning.getDateKey(String<YYYY-MM-DD> | Date)
+Reckoning.getMonth(String<YYYY-MM-DD> | Date)
+Reckoning.getDay(String<YYYY-MM-DD> | Date)
+Reckoning.mapRange(<DateRange>)
+Reckoning.between(String<YYYY-MM-DD> | Date from, String<YYYY-MM-DD> | Date to)
+Reckoning.locale(String | Array<String>)
+Reckoning.format(String<YYYY-MM-DD> | Date)
+Reckoning.parse(String<YYYY-MM-DD> | Date)
+```
+
+##### e.g.
+```javascript
+// explictly map today, tomorrow, and every weekend
+var partyTime = Reckoning.mapRange({ dates: [today, tomrorow], everyWeekday: [0,6] });
+partyTime.inRange(today);
+// true - time to party
+```
+
+### Using Reckoning as a Constructor
 
 Reckoning acts as a constructor and spits out views and simple API endpoints to modify the view on-the-fly.
 
@@ -140,34 +164,17 @@ Reckoning currently accepts the following options, with defaults pre-defined for
 
 The `name` parameter is the only required property, and it's not *really* required.  When intializing a `Reckoning` with the `ranges` object, the name is automatically assigned by the `DateRange`'s key if no `name` value is provided. (In this case, the key is transformed from `camelCase` to `kebab-case` since the name is used for css styles).  If initializing with an array, or via `mapRange`, a name is required.
 
+### Creating a Calendar
+
+With any Reckoning instance (i.e. `var foo = new Reckoning`), you can use the `[instance].createCalendar([Boolean | Object])` factory to generate a new calendar object.  This allows you to easily share multiple calendars with the same locale, formatting/parsing settings, and ranges.  It also allows you to handle `onDayClick` uniquely across different calendar views, etc.
+
+Note that this is **not** available from the main `Reckoning` instance and if you try to call it directly from `Reckoning.prototype.createCalendar` won't work.
+
 
 ##### More to come!
 
 More features are planned (and some already have defined defaults).  When they are fully functional the profile above will be updated.
 
-### Using Reckoning as a Utility
-
-Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Use `Reckoning` methods directly.
-
-##### Available non-instance methods:
-```javascript
-Reckoning.getDateKey(String<YYYY-MM-DD> | Date)
-Reckoning.getMonth(String<YYYY-MM-DD> | Date)
-Reckoning.getDay(String<YYYY-MM-DD> | Date)
-Reckoning.mapRange(<DateRange>)
-Reckoning.between(String<YYYY-MM-DD> | Date from, String<YYYY-MM-DD> | Date to)
-Reckoning.locale(String | Array<String>)
-Reckoning.format(String<YYYY-MM-DD> | Date)
-Reckoning.parse(String<YYYY-MM-DD> | Date)
-```
-
-##### e.g.
-```javascript
-// explictly map today, tomorrow, and every weekend
-var partyTime = Reckoning.mapRange({ dates: [today, tomrorow], everyWeekday: [0,6] });
-partyTime.inRange(today);
-// true - time to party
-```
 
 ### Using with Mithril
 
