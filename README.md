@@ -93,7 +93,7 @@ Reckoning currently accepts the following options, with defaults pre-defined for
   ranges: [Array<DateRange> | Object<DateRange>], // discussed below
 
   calendar: {
-    controls: [Boolean]
+    controls: [Boolean | Object], // controls object below
     today: [String<YYYY-MM-DD> | Date],
     dayView: [Function],
     numberOfMonths: [Number],
@@ -101,7 +101,8 @@ Reckoning currently accepts the following options, with defaults pre-defined for
     startDate: [String<YYYY-MM-DD> | Date],
     year: [Number],
     month: [Number],
-    onDayClick: [Function]
+    onDayClick: [Function],
+    onDayKeydown: [Function]
   },
 
   string: {

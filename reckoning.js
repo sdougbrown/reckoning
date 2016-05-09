@@ -217,7 +217,8 @@
         startDate: null,
         year: null,
         month: 0,
-        onDayClick: null
+        onDayClick: null,
+        onDayKeydown: null
       },
 
       string: {

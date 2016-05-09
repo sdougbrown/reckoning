@@ -14,6 +14,11 @@
       };
     },
 
+    handleDayKeydown: function (date) {
+      var dayKeydown = this.props.handleDayKeydown;
+      if (dayKeydown) dayKeydown(date);
+    },
+
     handleDayClick: function (date) {
       var dayClick = this.props.handleDayClick;
       if (dayClick) dayClick(date);
@@ -31,15 +36,30 @@
     render: function () {
       var calendar = this.props.calendar;
       var handleDayClick = this.handleDayClick;
+      var handleDayKeydown = this.handleDayKeydown;
+
+      function getControls () {
+        if (!calendar.calendarControls) return '';
+        return rc(Controls, {
+          controls: calendar.calendarControls,
+          handleClick: this.handleControlsClick
+        });
+      };
 
       return rc('div', {
         className: 'rk-cal',
         onFocus: calendar.onFocus.bind(calendar),
         tabindex: '0'
       },
-        (calendar.calendarControls) ? rc(Controls, { controls: calendar.calendarControls, handleClick: this.handleControlsClick }) : '',
+        getControls(),
         calendar.calendarMonths.map(function(month) {
-          return rc(Month, { month: month, calendar: calendar, key: month.key, handleDayClick: handleDayClick });
+          return rc(Month, {
+            month: month,
+            calendar: calendar,
+            key: month.key,
+            handleDayClick: handleDayClick,
+            handleDayKeydown: handleDayKeydown
+          });
         })
       );
     }
@@ -49,6 +69,7 @@
   var Month = React.createClass({
     render: function () {
       var handleDayClick = this.props.handleDayClick;
+      var handleDayKeydown = this.props.handleDayKeydown;
       var calVM = this.props.calendar.vm;
       var month = this.props.month;
       var vm = month.vm;
@@ -118,6 +139,8 @@
     handleKeydown: function () {
       var day = this.props.day;
       day.onKeydown(this);
+
+      this.props.handleDayKeydown(day.date);
     },
 
     render: function () {
