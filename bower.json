@@ -1,5 +1,6 @@
 {
   "name": "reckoning",
+  "version": "0.1.0",
   "description": "Reckoning - A Legendary Javascript Calendar",
   "main": "reckoning.js",
   "authors": [

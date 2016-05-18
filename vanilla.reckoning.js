@@ -45,7 +45,6 @@
     },
     month: function (ctrl) {
       var vm = ctrl.vm;
-      var calVM = ctrl.calendar.vm;
 
       var table = vt('table', {
         'class': 'rk-cal__month ' + vm.className(),
@@ -74,7 +73,7 @@
         'class': 'rk-cal__head__row--weekday'
       }, thead);
 
-      calVM.weekdays().forEach(function(day) {
+      ctrl.weekdays().forEach(function(day) {
         var weekdayCell = vt('th', {
          'class': 'rk-cal__head__weekday'
         }, weekdayRow);

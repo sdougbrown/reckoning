@@ -219,8 +219,8 @@ m.mount(document.body, {
 
 ### Roadmap
 
- - Test Suite
- - Timeline Visuals
+ - More Comprehensive Test Suite
+ - Adjustable Calendar Weeks
+ - Timeline Mapping/Visuals
  - Second Sample Theme
- - Alternate Implementations - React? Riot?
 

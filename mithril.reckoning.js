@@ -21,7 +21,6 @@
     },
     month: function (ctrl) {
       var vm = ctrl.vm;
-      var calVM = ctrl.calendar.vm;
 
       return m('table.rk-cal__month', {
         className: vm.className(),
@@ -39,7 +38,7 @@
             role: 'row',
             className: 'rk-cal__head__row--weekday'
           }, [
-            calVM.weekdays().map(function(day) {
+            ctrl.weekdays().map(function(day) {
               return m('th.rk-cal__head__weekday', [
                 m('span', { role: 'columnheader' }, day)
               ]);

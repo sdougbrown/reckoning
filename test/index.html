@@ -1,17 +1,57 @@
 <!doctype html>
 <html class="no-js">
-<meta charset="utf-8">
-<title>Reckoning Test Suite</title>
-<div id="mocha"></div>
+<head>
+  <meta charset="utf-8">
+  <title>Reckoning Test Suite</title>
+  <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
 
-<!-- Dependencies -->
-<script src="../node_modules/chai/chai.js"></script>
-<script src="../node_modules/sinon/pkg/sinon.js" charset="utf-8"></script>
-<script src="../node_modules/sinon-chai/lib/sinon-chai.js" charset="utf-8"></script>
-<link rel="stylesheet" href="../node_modules/mocha/mocha.css">
-<script src="../node_modules/mocha/mocha.js"></script>
+  <!-- Dependencies -->
+  <script src="../node_modules/mocha/mocha.js"></script>
+  <script src="../node_modules/chai/chai.js"></script>
+  <script src="../node_modules/sinon/pkg/sinon.js" charset="utf-8"></script>
+  <script src="../node_modules/sinon-chai/lib/sinon-chai.js" charset="utf-8"></script>
 
-<script type="text/javascript" src="../node_modules/mithril/mithril.min.js"></script>
-<script type="text/javascript" src="../reckoning.js"></script>
-<script type="text/javascript" src="../mithril.reckoning.js"></script>
+  <script src="../reckoning.js"></script>
 
+  <!-- Setup -->
+  <script>
+    mocha.setup("bdd");
+    var expect = chai.expect;
+    // Temporary workaround for https://github.com/mochajs/mocha/issues/1348
+    chai.config.truncateThreshold = 0;
+  </script>
+
+  <!-- Utils -->
+  <script>
+    // for seeing how crazy we need to be testin'
+    function toLocaleStringSupportsLocales() {
+      try {
+        new Date().toLocaleString('i');
+      } catch (e) {
+        return e.name === 'RangeError';
+      }
+      return false;
+    };
+  </script>
+
+  <!-- Tests -->
+  <script src="reckoning-spec.js"></script>
+  <script src="reckoning-parse-spec.js"></script>
+  <script src="reckoning-format-spec.js"></script>
+  <script src="reckoning-between-spec.js"></script>
+  <script src="reckoning-locale-spec.js"></script>
+  <script src="reckoning-mapRange-spec.js"></script>
+  <script src="reckoning-DateRange-spec.js"></script>
+  <script src="reckoning-DateRange-inRange-spec.js"></script>
+
+  <!-- Run -->
+  <script>
+    mocha.checkLeaks();
+    mocha.globals(["Reckoning"]);
+    mocha.run();
+  </script>
+</body>
+</html>

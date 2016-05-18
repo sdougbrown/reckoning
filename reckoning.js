@@ -151,9 +151,6 @@
     if (attrs.calendar) {
       this.calendar = this.createCalendar(attrs.calendar);
     }
-    if (attrs.timeline) {
-      this.timeline = this.createTimeline(attrs.timeline);
-    }
 
     this.view = this._view.bind(this, this);
     this.redraw = this._redraw;
@@ -201,11 +198,6 @@
         everyDate: null,
         everyWeekday: null,
         everyMonth: null
-      },
-
-      timeline: {
-        today: null,
-        units: 'day'
       },
 
       calendar: {
@@ -339,10 +331,6 @@
       return new Calendar(this, assign(this.defaults.calendar, calendarOps));
     },
 
-    createTimeline: function (timelineOps) {
-      return new Timeline(this, assign(this.defaults.timeline, timelineOps));
-    },
-
     // getting things
     getMonth: function (date) {
       date = this.parse(date);
@@ -395,7 +383,6 @@
     mapRange: function (range, ops) {
       return (isDateRange(range)) ? range : new DateRange(this, range, ops);
     },
-
 
     _mapRanges: function (ranges) {
       if (!ranges) return {};
@@ -507,14 +494,14 @@
 
 
   // child constructors
-  var DateRange = function (rk, range, ops) {
+  var DateRange = function (rk, rangeArg, opsArg) {
     this.parent = rk;
-    this.model = rk.model;
+    this.model = rk.model || { months: proppy(MONTHS), days: proppy(DAYS) };
 
-    range = range || {};
-    ops = ops || {};
+    var range = isObject(rangeArg) ? rangeArg : {};
+    var ops = isObject(opsArg) ? opsArg : {};
 
-    this.name =  this._getRangeName(range, ops);
+    this.name =  this._getRangeName(range, ops, opsArg);
     // parse and assign to this._*
     this.fromDate(range.fromDate);
     this.toDate(range.toDate);
@@ -526,8 +513,9 @@
     this.byDay = range.byDay || this._getMapByRepeat(range.everyDate);
 
     // add to dates map
-    if (range.dates) {
-      var dates = (isArray(range.dates)) ? range.dates : [range.dates];
+    if (!!range.dates || isArray(rangeArg)) {
+      var dates = (!!range.dates) ? range.dates : rangeArg;
+      dates = (isArray(dates)) ? dates : [dates];
 
       for (var i in dates) this.addDate(dates[i]);
     }
@@ -601,11 +589,11 @@
         isMatch = (this._toDate && this._fromDate) ? isMatchTo && isMatchFrom : isMatchTo || isMatchFrom;
 
         // do not check any further if not within the from/to range
-        if (!isMatch) return isMatch;
+        if (!isMatch) return !!isMatch;
       }
 
       if (this.byMonth) {
-        isMatch = !!this.byMonth[date.getMonth() + 1];
+        isMatch = !!this.byMonth[date.getMonth()];
         if (isMatch && this.byWeekday) isMatch = !!this.byWeekday[date.getDay()];
         if (isMatch && this.byDay) isMatch = !!this.byDay[date.getDate()];
       }
@@ -617,7 +605,7 @@
         isMatch = this.byDay[date.getDate()];
       }
 
-      return isMatch;
+      return !!isMatch;
     },
 
 
@@ -639,21 +627,18 @@
       // basically numbers can be directly mapped,
       // strings should run through parseInt,
       // NaN should be mapped against 'months',
-      // and all month keys should be 'human' style
-      // (i.e. getDate() + 1)
-      // others can be exact
       // for now, assume that this will be provided correctly
       if (!isDefined(value)) return null;
 
       var key = parseInt(value);
 
-      if (key !== NaN) {
+      if (key > -1) {
         return key;
       }
 
       if (type === 'month') {
         var index = this.model.months().indexOf(value);
-        return (index > -1) ? index + 1 : null;
+        return (index > -1) ? index : null;
       }
 
       if (type === 'weekday') {
@@ -695,39 +680,20 @@
 
       for (var i in everyValue) {
         key = this._getNumericalKey(everyValue[i], type);
-        if (!!key) map[key] = true;
+        if (key !== null) map[key] = true;
       }
 
       return map;
     },
 
-    _getRangeName: function (range, ops) {
-      var key = range.name || ops.key;
+    _getRangeName: function (range, ops, str) {
+      var key = (range.name) ? range.name : (ops.key) ? ops.key : isString(str) ? str : 'range';
       var str = '' + key;
 
       return str.replace(/\W+/g, '-')
                 .replace(/([a-z\d])([A-Z])/g, '$1-$2')
                 .toLowerCase();
     }
-  };
-
-  var Timeline = function (rk, ops) {
-    this.parent = rk;
-    this.model = rk.model;
-
-    this.view = this._view.bind(this, this);
-  };
-
-  Timeline.prototype = {
-    constructor: Timeline,
-
-    unitMap: {
-      day: Date.prototype.getDate,
-      month: Date.prototype.getMonth,
-      year: Date.prototype.getFullYear
-    },
-
-    _view: noop
   };
 
   var Calendar = function (rk, ops) {
@@ -822,6 +788,7 @@
           calendar: this,
           title: rk.format(date, { string: { month: rk.string.month, year: rk.string.year } }),
           ranges: rk.ranges,
+          weekdays: vm.weekdays,
           month: monthyear.month,
           year: monthyear.year,
           counter: i + 1,
@@ -903,6 +870,7 @@
 
   var Month = function (attrs) {
     this.calendar = attrs.calendar;
+    this.weekdays = attrs.weekdays;
     this.ranges = attrs.ranges;
     this.month = attrs.month;
     this.year = attrs.year;
@@ -1072,7 +1040,6 @@
   // save components to the parent constructor
   Reckoning.prototype.components = {
     DateRange: DateRange,
-    Timeline: Timeline,
     Calendar: Calendar,
     Controls: Controls,
     Month: Month,

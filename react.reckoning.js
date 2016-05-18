@@ -70,7 +70,6 @@
     render: function () {
       var handleDayClick = this.props.handleDayClick;
       var handleDayKeydown = this.props.handleDayKeydown;
-      var calVM = this.props.calendar.vm;
       var month = this.props.month;
       var vm = month.vm;
 
@@ -96,7 +95,7 @@
             role: 'row',
             className: 'rk-cal__head__row rk-cal__head__row--weekday'
           },
-            calVM.weekdays().map(function(weekday, index) {
+            month.weekdays().map(function(weekday, index) {
               return rc('th', {
                 className: 'rk-cal__head__weekday',
                 key: index
