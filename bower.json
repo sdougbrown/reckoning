@@ -1,10 +1,10 @@
 {
   "name": "reckoning",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reckoning - A Legendary Javascript Calendar",
   "main": "reckoning.js",
   "authors": [
-    "Doug Brown"
+    "Doug Brown <reckoning@douggo.com>  (http://douggo.com/)"
   ],
   "license": "MIT",
   "keywords": [

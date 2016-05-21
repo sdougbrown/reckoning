@@ -1,12 +1,10 @@
 {
   "name": "reckoning",
   "description": "Reckoning - A Legendary Javascript Calendar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://reckoning.douggo.com",
   "license": "MIT",
-  "author": {
-    "name": "Doug Brown"
-  },
+  "author": "Doug Brown <reckoning@douggo.com>  (http://douggo.com/)",
   "repository": {
     "type": "git",
     "url": "git@github.com:sdougbrown/reckoning.git"

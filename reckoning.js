@@ -107,7 +107,7 @@
   };
 
   function getLocale (nav) {
-    nav = nav || navigator || global.navigator;
+    nav = nav || global.navigator || {};
 
     return nav.languages || nav.userLanguage || nav.language || 'en-US';
   };
