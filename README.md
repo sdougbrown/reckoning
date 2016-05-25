@@ -10,11 +10,13 @@ Check out the [demo page](http://reckoning.douggo.com) for the current feature-s
 
 Reckoning is a data-driven time visualization library.  That's a very fancy way of saying a 'calendar'.
 
-Reckoning is currently built in native JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org), which is a nice small framework that handles smart on-the-fly re-rendering.
+Reckoning is currently built in native (es5) JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org), which is a nice small framework that handles smart on-the-fly re-rendering.
 
 ### What's the point?
 
-A lot of calendar libraries are either document-driven (i.e. a jQuery plugin) or are difficult to style (i.e. ... a jQuery plugin).  The goal for this project is to produce a highly-reusable calendar library that can be used in a multitude of ways while always looking and feeling amazing.
+A lot of calendar libraries are either document-driven (i.e. a jQuery plugin) or are difficult to style (i.e. ... a jQuery plugin).  The goal for this project is to produce a highly-reusable calendar library that can be used in a multitude of ways while always looking and feeling amazing. (But don't worry we'll probably end up making a jQuery plugin for it eventually.)
+
+The goal is to make Reckoning a base module for other calendar implimentations, rather than trying to pack everything into the core.
 
 ### Key Features
 
@@ -25,7 +27,7 @@ A lot of calendar libraries are either document-driven (i.e. a jQuery plugin) or
  - Simple keyboard/click API for calendar interactions
  - Semantic table markup
  - Accessiblity by default
- - Localization by default
+ - Localization by default (where supported)
 
 ### Using Reckoning as a Utility
 
@@ -220,6 +222,7 @@ m.mount(document.body, {
 ### Roadmap
 
  - More Comprehensive Test Suite
+ - moment.js Integration Example
  - Adjustable Calendar Weeks
  - Timeline Mapping/Visuals
  - Second Sample Theme

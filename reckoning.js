@@ -280,7 +280,7 @@
       ops = ops || {};
       date = this.parse(date);
       if (!date) return null;
-      if (this._format) return this._format(date);
+      if (this._format) return this._format(date, ops);
 
       var string = ops.string || this.string || this.prototype.defaults.string;
 
@@ -710,7 +710,7 @@
     this.calendarControls = this._createControls(controls);
 
     this.today = proppy(this.parent.parse(ops.today) || new Date());
-    this.getDisplayDate = (canUseLocales) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
+    this.getDisplayDate = (canUseLocales || this.parent._format) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
     var startDate = this._getStartDate(ops);
 
@@ -786,7 +786,7 @@
         date = new Date(monthyear.year, monthyear.month, 1);
         months[i] = new Month({
           calendar: this,
-          title: rk.format(date, { string: { month: rk.string.month, year: rk.string.year } }),
+          title: rk.format(date, { isCalendarMonth: true, string: { month: rk.string.month, year: rk.string.year } }),
           ranges: rk.ranges,
           weekdays: vm.weekdays,
           month: monthyear.month,
@@ -852,7 +852,7 @@
     },
 
     _getLocaleDisplayDate: function (date) {
-      return this.parent.format(date, { string: { day: 'numeric' } });
+      return this.parent.format(date, { isCalendarDay: true, string: { day: 'numeric' } });
     },
 
     _createControls: function (ops) {
