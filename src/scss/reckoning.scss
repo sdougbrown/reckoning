@@ -82,6 +82,7 @@ $rk-cal-day-width: (100% / 7);
 $rk-cal-head-month-bg: none !default;
 $rk-cal-head-month-color: inherit !default;
 $rk-cal-head-month-padding: $rk-cal-head-padding !default;
+$rk-cal-head-month-bottom-border: none !default;
 $rk-cal-head-month-alignment: inherit !default;
 $rk-cal-head-month-line-height: inherit !default;
 $rk-cal-head-month-height: auto !default;
@@ -90,6 +91,7 @@ $rk-cal-head-month-visibility: visible !default;
 $rk-cal-head-weekday-bg: none !default;
 $rk-cal-head-weekday-color: inherit !default;
 $rk-cal-head-weekday-padding: $rk-cal-day-padding !default;
+$rk-cal-head-weekday-bottom-border: none !default;
 $rk-cal-head-weekday-alignment: inherit !default;
 $rk-cal-head-weekday-line-height: inherit !default;
 $rk-cal-head-weekday-height: auto !default;
@@ -221,6 +223,7 @@ $rk-cal-controls-next-top: auto !default;
   color: $rk-cal-head-month-color;
 
   padding: $rk-cal-head-month-padding;
+  border-bottom: $rk-cal-head-month-bottom-border;
 
   text-align: $rk-cal-head-month-alignment;
   line-height: $rk-cal-head-month-line-height;
@@ -236,6 +239,7 @@ $rk-cal-controls-next-top: auto !default;
   color: $rk-cal-head-weekday-color;
 
   padding: $rk-cal-head-weekday-padding;
+  border-bottom: $rk-cal-head-weekday-bottom-border;
 
   text-align: $rk-cal-head-weekday-alignment;
   line-height: $rk-cal-head-weekday-line-height;
