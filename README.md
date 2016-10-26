@@ -1,6 +1,6 @@
 # Reckoning
 
-A Legendary Javascript Calendar Framework
+🗓  A Legendary Javascript Calendar Library
 
 Check out the [demo page](http://reckoning.douggo.com) for the current feature-set
 
@@ -10,7 +10,7 @@ Check out the [demo page](http://reckoning.douggo.com) for the current feature-s
 
 Reckoning is a data-driven time visualization library.  That's a very fancy way of saying a 'calendar'.
 
-Reckoning is currently built in native (es5) JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org), which is a nice small framework that handles smart on-the-fly re-rendering.
+Reckoning is currently built in native (es5) JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org).
 
 ### What's the point?
 

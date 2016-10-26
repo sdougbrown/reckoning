@@ -14,6 +14,26 @@
       };
     },
 
+    _bindHandlers: function(props) {
+      var calendar = props.calendar;
+      this._handleFocus = calendar.onFocus.bind(calendar);
+    },
+
+    componentWillMount: function() {
+      this._bindHandlers(this.props);
+    },
+
+    componentWillReceiveProps: function(newProps) {
+      this._bindHandlers(newProps);
+
+      var vm = newProps.calendar.vm;
+
+      this.setState({
+        month: vm.month(),
+        year: vm.year(),
+      });
+    },
+
     handleDayKeydown: function (date) {
       var dayKeydown = this.props.handleDayKeydown;
       if (dayKeydown) dayKeydown(date);
@@ -33,6 +53,10 @@
       });
     },
 
+    handleCalendarFocus: function () {
+      return this._handleFocus && this._handleFocus();
+    },
+
     render: function () {
       var calendar = this.props.calendar;
       var handleDayClick = this.handleDayClick;
@@ -48,8 +72,8 @@
 
       return rc('div', {
         className: 'rk-cal',
-        onFocus: calendar.onFocus.bind(calendar),
-        tabindex: '0'
+        onFocus: this.handleCalendarFocus,
+        tabIndex: '0'
       },
         getControls(),
         calendar.calendarMonths.map(function(month) {
@@ -66,64 +90,62 @@
   });
 
 
-  var Month = React.createClass({
-    render: function () {
-      var handleDayClick = this.props.handleDayClick;
-      var handleDayKeydown = this.props.handleDayKeydown;
-      var month = this.props.month;
-      var vm = month.vm;
+  var Month = function (props) {
+    var handleDayClick = props.handleDayClick;
+    var handleDayKeydown = props.handleDayKeydown;
+    var month = props.month;
+    var vm = month.vm;
 
-      return rc('table', {
-        key: month.key,
-        role: 'grid',
-        className: 'rk-cal__month ' + vm.className()
+    return rc('table', {
+      key: month.key,
+      role: 'grid',
+      className: 'rk-cal__month ' + vm.className()
+    },
+      rc('thead', {
+        role: 'rowgroup',
+        className: 'rk-cal__head'
       },
-        rc('thead', {
-          role: 'rowgroup',
-          className: 'rk-cal__head'
+        rc('tr', {
+          role: 'row',
+          className: 'rk-cal__head__row rk-cal__head__row--month'
         },
-          rc('tr', {
-            role: 'row',
-            className: 'rk-cal__head__row rk-cal__head__row--month'
-          },
-            rc('th', {
-              colSpan: 7,
-              className: 'rk-cal__head__month'
-            }, vm.title())
-          ),
-          rc('tr', {
-            role: 'row',
-            className: 'rk-cal__head__row rk-cal__head__row--weekday'
-          },
-            month.weekdays().map(function(weekday, index) {
-              return rc('th', {
-                className: 'rk-cal__head__weekday',
-                key: index
-              },
-                rc('span', { role: 'columnheader' }, weekday)
-              );
-            })
-          )
+          rc('th', {
+            colSpan: 7,
+            className: 'rk-cal__head__month'
+          }, vm.title())
         ),
-        rc('tbody', {
-          role: 'rowgroup',
-          className: 'rk-cal__body'
+        rc('tr', {
+          role: 'row',
+          className: 'rk-cal__head__row rk-cal__head__row--weekday'
         },
-          vm.weeks.map(function(week, index) {
-            return rc('tr', {
-              key: index,
-              role: 'row',
-              className: 'rk-cal__body__row'
+          month.weekdays().map(function(weekday, index) {
+            return rc('th', {
+              className: 'rk-cal__head__weekday',
+              key: index
             },
-              week.map(function(day) {
-                return rc(Day, { day: day, key: day.key, handleDayClick: handleDayClick });
-              })
+              rc('span', { role: 'columnheader' }, weekday)
             );
           })
         )
-      );
-    }
-  });
+      ),
+      rc('tbody', {
+        role: 'rowgroup',
+        className: 'rk-cal__body'
+      },
+        vm.weeks.map(function(week, index) {
+          return rc('tr', {
+            key: index,
+            role: 'row',
+            className: 'rk-cal__body__row'
+          },
+            week.map(function(day) {
+              return rc(Day, { day: day, key: day.key, handleDayClick: handleDayClick });
+            })
+          );
+        })
+      )
+    );
+  };
 
 
   var Day = React.createClass({
@@ -153,11 +175,11 @@
         'aria-rowindex': indexes.week + 1,
         'aria-colindex': indexes.weekday + 1,
         className: 'rk-cal__day ' + day.classNames(),
-        tabindex: vm.tabindex(),
+        tabIndex: vm.tabindex(),
         onBlur: day.onBlur.bind(day),
         onFocus: day.onFocus.bind(day),
         onClick: this.handleClick,
-        onKeydown: this.handleKeydown
+        onKeyDown: this.handleKeydown
       },
         rc('span', {
           'aria-label': day.date,
@@ -168,42 +190,38 @@
   });
 
 
-  var Controls = React.createClass({
-    render: function () {
-      var controls = this.props.controls;
-      var handleClick = this.props.handleClick;
+  var Controls = function (props) {
+    var controls = props.controls;
+    var handleClick = props.handleClick;
 
-      return rc('div', {
-        className: 'rk-cal__controls'
+    return rc('div', {
+      className: 'rk-cal__controls'
+    },
+      rc('div', {
+        className: 'rk-cal__controls__wrap'
       },
-        rc('div', {
-          className: 'rk-cal__controls__wrap'
-        },
-          rc(Control, { name: 'previous', controls: controls, handleClick: handleClick }),
-          rc(Control, { name: 'reset', controls: controls, handleClick: handleClick }),
-          rc(Control, { name: 'next', controls: controls, handleClick: handleClick })
-        )
-      );
-    }
-  });
+        rc(Control, { name: 'previous', controls: controls, handleClick: handleClick }),
+        rc(Control, { name: 'reset', controls: controls, handleClick: handleClick }),
+        rc(Control, { name: 'next', controls: controls, handleClick: handleClick })
+      )
+    );
+  };
 
 
-  var Control = React.createClass({
-    render: function () {
-      var name = this.props.name;
-      var ctrl = this.props.controls;
-      var views = ctrl.views;
-      var vm = ctrl.vm;
+  var Control = function (props) {
+    var name = props.name;
+    var ctrl = props.controls;
+    var views = ctrl.views;
+    var vm = ctrl.vm;
 
-      if (!vm[name]()) return '';
+    if (!vm[name]()) return null;
 
-      var onClick = ctrl.onClick[name] || noop;
-      return rc('button', {
-        'aria-label': name,
-        className: 'rk-cal__controls__'+name,
-        onClick: onClick.bind(ctrl, this.props.handleClick)
-      }, (views[name]) ? views[name]() : '');
-    }
-  });
+    var onClick = ctrl.onClick[name] || noop;
+    return rc('button', {
+      'aria-label': name,
+      className: 'rk-cal__controls__'+name,
+      onClick: onClick.bind(ctrl, props.handleClick)
+    }, (views[name]) ? views[name]() : '');
+  };
 
 })(Reckoning, React);

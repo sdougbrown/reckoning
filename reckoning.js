@@ -63,10 +63,14 @@
   // shallow copy defaults + attrs
   function assign (defaults, attrs) {
     var obj = {};
-    for (var prop in defaults) obj[prop] = defaults[prop];
+    for (var prop in defaults) {
+      if (hasOwn.call(defaults, prop)) obj[prop] = defaults[prop];
+    }
     // allow 'true' to just use defaults
     if (isObject(attrs)) {
-      for (var prop in attrs) obj[prop] = attrs[prop];
+      for (var prop in attrs) {
+        if (hasOwn.call(attrs, prop)) obj[prop] = attrs[prop];
+      }
     }
     return obj;
   };
@@ -388,7 +392,7 @@
       if (!ranges) return {};
       var map = {};
       for (var prop in ranges) {
-        if (!isObject(ranges[prop])) continue;
+        if (!hasOwn.call(ranges, prop) || !isObject(ranges[prop])) continue;
         var key = ranges[prop].id || prop;
         map[key] = this.mapRange(ranges[prop], { key: key });
       }
@@ -472,7 +476,7 @@
 
       // iterate over known index to get the desired string
       for (var i in typeMap[type].index) {
-        map[i] = getString(i);
+        if (hasOwn.call(typeMap[type].index, i)) map[i] = getString(i);
       }
 
       return map;
@@ -517,7 +521,9 @@
       var dates = (!!range.dates) ? range.dates : rangeArg;
       dates = (isArray(dates)) ? dates : [dates];
 
-      for (var i in dates) this.addDate(dates[i]);
+      for (var i in dates) {
+        if (hasOwn.call(dates, i)) this.addDate(dates[i]);
+      }
     }
   };
 
@@ -540,7 +546,7 @@
       };
 
       for (var date in this.byDate) {
-        if (!!this.byDate[date]) {
+        if (hasOwn.call(this.byDate, date) && !!this.byDate[date]) {
           json.dates.push(date);
         }
       }
@@ -679,8 +685,10 @@
       }
 
       for (var i in everyValue) {
-        key = this._getNumericalKey(everyValue[i], type);
-        if (key !== null) map[key] = true;
+        if (hasOwn.call(everyValue, i)) {
+          key = this._getNumericalKey(everyValue[i], type);
+          if (key !== null) map[key] = true;
+        }
       }
 
       return map;
