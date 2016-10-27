@@ -103,6 +103,7 @@
     },
     day: function (ctrl) {
       var vm = ctrl.vm;
+      var handlers = ctrl.handlers;
       var indexes = ctrl.indexes;
       var calendar = ctrl.calendar;
 
@@ -115,10 +116,10 @@
         tabindex: vm.tabindex()
       });
 
-      dayCell.onblur = ctrl.onBlur.bind(ctrl);
-      dayCell.onfocus = ctrl.onFocus.bind(ctrl);
-      dayCell.onclick = function(e) { ctrl.onClick(e) };
-      dayCell.onkeydown = function(e) { ctrl.onKeydown(e) };
+      dayCell.onblur = handlers.onBlur;
+      dayCell.onfocus = handlers.onFocus;
+      dayCell.onclick = handlers.onClick;
+      dayCell.onkeydown = handlers.onKeydown;
 
       var dayNum = vt('span', {
         'class': 'rk-cal__day__num',

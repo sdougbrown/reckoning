@@ -152,23 +152,23 @@
   var Day = React.createClass({
 
     handleBlur: function () {
-      this.props.day.onBlur.call(this.props.day);
+      this.props.day.handlers.onBlur();
     },
 
     handleFocus: function () {
-      this.props.day.onFocus.call(this.props.day);
+      this.props.day.handlers.onFocus();
     },
 
-    handleClick: function () {
+    handleClick: function (e) {
       var day = this.props.day;
-      day.onClick(this);
+      day.handlers.onClick(e);
 
       this.props.handleDayClick(day.date);
     },
 
-    handleKeydown: function () {
+    handleKeydown: function (e) {
       var day = this.props.day;
-      day.onKeydown(this);
+      day.handlers.onKeydown(e);
 
       this.props.handleDayKeydown(day.date);
     },
@@ -176,6 +176,7 @@
     render: function () {
       var day = this.props.day;
       var vm = day.vm;
+      var handlers = day.handlers;
       var indexes = day.indexes;
 
       return rc('td', {

@@ -717,6 +717,9 @@
     this.calendarMonths = [];
     this.calendarControls = this._createControls(controls);
 
+    this.handlers = {};
+    this.createHandlers = this._createHandlers.bind(this);
+
     this.today = proppy(this.parent.parse(ops.today) || new Date());
     this.getDisplayDate = (canUseLocales || this.parent._format) ? this._getLocaleDisplayDate : this._getSimpleDisplayDate;
 
@@ -873,6 +876,24 @@
       });
     },
 
+    // pre-bind handlers, store to a handlers key
+    _createHandlers: function(key, date, indexes, handlerMap) {
+      function onClick(e) {
+        this.onDayClick(e, date);
+      }
+
+      function onKeydown(e) {
+        this.onDayKeydown(e, date, indexes);
+      }
+
+      this.handlers[key] = assign({
+        onClick: onClick.bind(this),
+        onKeydown: onKeydown.bind(this)
+      }, handlerMap);
+
+      return this.handlers[key];
+    },
+
     _view: noop
   };
 
@@ -904,6 +925,7 @@
       var rk = this.calendar.parent;
       var dayMap = ops.days;
       var dateMap = ops.dates;
+      var handlerMap = this.calendar.handlers;
       var weeks = [[],[],[],[],[]];
       // start at day 1 :)
       var startDate = new Date(this.year, this.month, 1);
@@ -918,6 +940,7 @@
           ranges: this.ranges,
           month: this.month,
           date: new Date(startDate),
+          handlers: handlerMap[dateKey] || this.calendar.createHandlers,
           key: dateKey,
           indexes: {
             grid: i,
@@ -951,6 +974,7 @@
     this.date = attrs.date;
     this.indexes = attrs.indexes;
     this.key = attrs.key;
+    this.handlers = isFunction(attrs.handlers) ? this.createHandlers(attrs.handlers) : attrs.handlers;
 
     this.vm = mapViewModel({
       textDate: this.calendar.getDisplayDate(this.date),
@@ -960,10 +984,18 @@
       inMonthClassName: (this.month === this.date.getMonth()) ? ' is-month' : ' is-not-month'
     });
 
+
     this.view = this._view.bind(this, this);
   };
 
   Day.prototype = {
+    createHandlers: function (createHandlers) {
+      return createHandlers(this.key, this.date, this.indexes, {
+        onFocus: this.onFocus.bind(this),
+        onBlur: this.onBlur.bind(this)
+      });
+    },
+
     classNames: function () {
       var vm = this.vm;
       return vm.inFocusClassName() + vm.inMonthClassName() + this.inRangeClassNames();
@@ -981,11 +1013,9 @@
     },
 
     inRangeClassNames: function () {
-      var className = '';
-      this.inRanges().forEach(function (rangeName) {
-        className += ' is-range-' + rangeName;
-      });
-      return className;
+      return this.inRanges().map(function (rangeName) {
+        return ' is-range-' + rangeName;
+      }).join('');
     },
 
     onFocus: function () {
@@ -994,14 +1024,6 @@
 
     onBlur: function () {
       this.vm.inFocusClassName('');
-    },
-
-    onClick: function (e) {
-      this.calendar.onDayClick(e, this.date);
-    },
-
-    onKeydown: function (e) {
-      this.calendar.onDayKeydown(e, this.date, this.indexes);
     },
 
     _view: noop
@@ -1030,15 +1052,15 @@
     onClick: {
       next: function (cb) {
         this.calendar.next();
-        if (cb) cb();
+        if (isFunction(cb)) cb();
       },
       previous: function (cb) {
         this.calendar.previous();
-        if (cb) cb();
+        if (isFunction(cb)) cb();
       },
       reset: function (cb) {
         this.calendar.reset();
-        if (cb) cb();
+        if (isFunction(cb)) cb();
       }
     },
 

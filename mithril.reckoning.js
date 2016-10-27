@@ -58,6 +58,7 @@
     },
     day: function (ctrl) {
       var vm = ctrl.vm;
+      var handlers = ctrl.handlers;
       var indexes = ctrl.indexes;
       var calendar = ctrl.calendar;
 
@@ -68,10 +69,10 @@
         'aria-colindex': indexes.weekday + 1,
         className: ctrl.classNames(),
         tabindex: vm.tabindex(),
-        onblur: ctrl.onBlur.bind(ctrl),
-        onfocus: ctrl.onFocus.bind(ctrl),
-        onclick: function(e) { ctrl.onClick(e) },
-        onkeydown: function(e) { ctrl.onKeydown(e) },
+        onblur: handlers.onBlur,
+        onfocus: handlers.onFocus,
+        onclick: handlers.onClick,
+        onkeydown: handlers.onKeydown,
         config: ctrl.config.bind(ctrl)
       }, [
         m('span.rk-cal__day__num', { 'aria-label': ctrl.date }, vm.textDate()),
