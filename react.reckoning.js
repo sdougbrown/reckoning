@@ -61,12 +61,13 @@
       var calendar = this.props.calendar;
       var handleDayClick = this.handleDayClick;
       var handleDayKeydown = this.handleDayKeydown;
+      var handleControlsClick = this.handleControlsClick;
 
       function getControls () {
         if (!calendar.calendarControls) return '';
         return rc(Controls, {
           controls: calendar.calendarControls,
-          handleClick: this.handleControlsClick
+          onClick: handleControlsClick
         });
       };
 
@@ -150,6 +151,14 @@
 
   var Day = React.createClass({
 
+    handleBlur: function () {
+      this.props.day.onBlur.call(this.props.day);
+    },
+
+    handleFocus: function () {
+      this.props.day.onFocus.call(this.props.day);
+    },
+
     handleClick: function () {
       var day = this.props.day;
       day.onClick(this);
@@ -176,8 +185,8 @@
         'aria-colindex': indexes.weekday + 1,
         className: 'rk-cal__day ' + day.classNames(),
         tabIndex: vm.tabindex(),
-        onBlur: day.onBlur.bind(day),
-        onFocus: day.onFocus.bind(day),
+        onBlur: this.handleBlur,
+        onFocus: this.handleFocus,
         onClick: this.handleClick,
         onKeyDown: this.handleKeydown
       },
@@ -192,7 +201,7 @@
 
   var Controls = function (props) {
     var controls = props.controls;
-    var handleClick = props.handleClick;
+    var onClick = props.onClick;
 
     return rc('div', {
       className: 'rk-cal__controls'
@@ -200,9 +209,9 @@
       rc('div', {
         className: 'rk-cal__controls__wrap'
       },
-        rc(Control, { name: 'previous', controls: controls, handleClick: handleClick }),
-        rc(Control, { name: 'reset', controls: controls, handleClick: handleClick }),
-        rc(Control, { name: 'next', controls: controls, handleClick: handleClick })
+        rc(Control, { name: 'previous', controls: controls, onClick: onClick }),
+        rc(Control, { name: 'reset', controls: controls, onClick: onClick }),
+        rc(Control, { name: 'next', controls: controls, onClick: onClick })
       )
     );
   };
@@ -220,7 +229,7 @@
     return rc('button', {
       'aria-label': name,
       className: 'rk-cal__controls__'+name,
-      onClick: onClick.bind(ctrl, props.handleClick)
+      onClick: onClick.bind(ctrl, props.onClick)
     }, (views[name]) ? views[name]() : '');
   };
 
