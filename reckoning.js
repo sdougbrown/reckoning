@@ -116,6 +116,10 @@
     return nav.languages || nav.userLanguage || nav.language || 'en-US';
   };
 
+  function useIf (newVal, prevVal) {
+    return isDefined(newVal) ? newVal : prevVal;
+  }
+
   function noop () {};
 
 
@@ -755,6 +759,37 @@
         numberOfMonths: vm.numberOfMonths.toJSON(),
         startDate: vm.year.toJSON() + '-' + vm.month.toJSON() + '-1'
       };
+    },
+
+    setState: function (ops) {
+      this._onFocus = useIf(ops.onFocus, this._onFocus);
+      this._onDayClick = useIf(ops.onDayClick, this._onDayClick);
+      this._onDayKeydown = useIf(ops.onDayKeydown, this._onDayKeydown);
+      this.monthView = useIf(ops.monthView, this.monthView);
+      this.dayView = useIf(ops.dayView, this.dayView);
+
+      if (ops.controls) {
+        var controls = assign(this.parent.defaults.controls, ops.controls);
+        this.calendarControls = this._createControls(controls);
+      }
+      if (ops.startDate) {
+        this.vm.resetDate(this._getStartDate(ops));
+      }
+      if (ops.today) {
+        this.today(this.parent.parse(ops.today));
+      }
+      if (ops.numberOfMonths) {
+        this.vm.numberOfMonths(ops.numberOfMonths);
+      }
+      if (isDefined(ops.startWeekOnDay)) {
+        this.vm.startWeekOnDay(ops.startWeekOnDay);
+      }
+      if (ops.year || ops.month) {
+        if (isDefined(ops.year)) this.vm.year(ops.year);
+        if (isDefined(ops.month)) this.vm.month(ops.month);
+
+        this.updateMonths(this.calendarMonths);
+      }
     },
 
     advance: function (amount) {

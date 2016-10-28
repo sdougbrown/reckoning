@@ -20,7 +20,7 @@ Reckoning is currently built in native (es5) JS and has 'vanilla views', but the
 
 A lot of calendar libraries are either document-driven (i.e. a jQuery plugin) or are difficult to style (i.e. ... a jQuery plugin).  The goal for this project is to produce a highly-reusable calendar library that can be used in a multitude of ways while always looking and feeling amazing. (But don't worry we'll probably end up making a jQuery plugin for it eventually.)
 
-The goal is to make Reckoning a base module for other calendar implimentations, rather than trying to pack everything into the core.
+Reckoning is intended to be a base module for other calendar implimentations, rather than trying to pack everything into the core (e.g. key bindings, date picker field, etc)
 
 ### Key Features
 
