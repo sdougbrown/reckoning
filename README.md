@@ -1,5 +1,9 @@
 # Reckoning
 
+[![Build Status](https://travis-ci.org/sdougbrown/reckoning.svg)](https://travis-ci.org/sdougbrown/reckoning)
+[![GitHub issues](https://img.shields.io/github/issues/sdougbrown/reckoning.svg)](https://github.com/sdougbrown/reckoning/issues)
+[![Dependencies](https://img.shields.io/david/sdougbrown/reckoning.svg?style=flat)](https://david-dm.org/sdougbrown/reckoning)
+
 🗓  A Legendary Javascript Calendar Library
 
 Check out the [demo page](http://reckoning.douggo.com) for the current feature-set
@@ -8,7 +12,7 @@ Check out the [demo page](http://reckoning.douggo.com) for the current feature-s
 
 ## What is Reckoning?
 
-Reckoning is a data-driven time visualization library.  That's a very fancy way of saying a 'calendar'.
+Reckoning is a state manager for calendar visualizations.  It allows you to specify how a calendar should behave, and derive a view from that calendar state that can be applied in a variety of frameworks or styles.
 
 Reckoning is currently built in native (es5) JS and has 'vanilla views', but there is a heavy leaning towards integration with [Mithril](http://mithril.js.org).
 
