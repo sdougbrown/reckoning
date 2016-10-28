@@ -29,6 +29,16 @@ module.exports = function (grunt) {
       reckoning: { src: "reckoning.js", dest: "reckoning.min.js" }
     },
 
+    mochaTest: {
+      test: {
+        src: ["test/**-spec.js"],
+        options: {
+          require: ['./test/index.js'],
+          reporter: "spec"
+        }
+      }
+    },
+
     mocha_phantomjs: {
       test: {
         src: ["test/index.html"],
@@ -183,6 +193,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks("grunt-postcss");
   grunt.loadNpmTasks("grunt-mkdir");
+  grunt.loadNpmTasks("grunt-mocha-test");
   grunt.loadNpmTasks("grunt-mocha-phantomjs");
 
   grunt.registerTask("build", [
@@ -204,6 +215,6 @@ module.exports = function (grunt) {
     "watch"
   ]);
 
-  grunt.registerTask("test", ["mocha_phantomjs"]);
+  grunt.registerTask("test", ["mocha_phantomjs", "mochaTest"]);
   grunt.registerTask("default", ["demo"]);
 };
