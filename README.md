@@ -33,6 +33,25 @@ Reckoning is intended to be a base module for other calendar implimentations, ra
  - Accessiblity by default
  - Localization by default (where supported)
 
+### Examples
+
+```javascript
+> Reckoning.getDay('2014-09-22')
+Object {index: 1, numeric: 2, string: "Monday"}
+
+> Reckoning.getMonth('2014-09-22')
+Object {index: 8, numeric: 9, string: "September"}
+
+> Reckoning.parse('2014-09-22')
+Mon Sep 22 2014 00:00:00 GMT-0400 (EDT)
+
+> Reckoning.format('2014-09-22')
+"Mon, September 22, 2014"
+
+> new Reckoning({ locale: 'de-DE', string: { weekday: 'long' } }).mapDays()
+["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+```
+
 ### Using Reckoning as a Utility
 
 Maybe you don't want to generate an entire calendar and you just want to map a range using Reckoning's API?  Cool dude - I've got you there.  Use `Reckoning` methods directly.
